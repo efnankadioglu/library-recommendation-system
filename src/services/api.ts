@@ -114,13 +114,15 @@ export async function getBooks(): Promise<Book[]> {
  * return response.json();
  */
 export async function getBook(id: string): Promise<Book | null> {
-  // Şimdilik MOCK (tek kitap endpoint’in yok henüz)
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const book = mockBooks.find((b) => b.id === id);
-      resolve(book || null);
-    }, 300);
-  });
+  const response = await fetch(`${API_BASE_URL}/books/${id}`);
+
+  if (response.status === 404) return null;
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch book');
+  }
+
+  return response.json();
 }
 
 /**

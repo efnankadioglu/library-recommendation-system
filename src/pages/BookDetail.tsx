@@ -23,16 +23,42 @@ export function BookDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // const loadBook = async (bookId: string) => {
+  //   setIsLoading(true);
+  //   try {
+  //     const data = await getBook(bookId);
+  //     if (!data) {
+  //       navigate('/404');
+  //       return;
+  //     }
+  //     setBook(data);
+  //   } catch (error) {
+  //     handleApiError(error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
   const loadBook = async (bookId: string) => {
     setIsLoading(true);
     try {
+      // 1. AWS'den veriyi istiyoruz
       const data = await getBook(bookId);
+
+      // 🛡️ KRİTİK DEBUG: Tarayıcıda F12 -> Console sekmesinde bu satırı gör.
+      // Veri geliyorsa ama ekranda yoksa, buradaki isimlere bakacağız.
+      console.log("AWS'den gelen ham veri:", data);
+
       if (!data) {
         navigate('/404');
         return;
       }
+
+      // 2. Gelen veriyi 'book' durumuna kaydediyoruz.
+      // Eğer api.ts'de 'Item' ayıklamasını yaptıysan direkt data yazabilirsin.
       setBook(data);
     } catch (error) {
+      // Hatayı konsola yazdırarak sebebini (Network mü, Veri mi) anlıyoruz.
+      console.error('Veri çekme sırasında bir hata oluştu:', error);
       handleApiError(error);
     } finally {
       setIsLoading(false);
@@ -111,7 +137,8 @@ export function BookDetail() {
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                   <span className="text-lg font-bold text-amber-700">
-                    {formatRating(book.rating)}
+                    {/* {formatRating(book.rating)} */}
+                    {book.rating ? formatRating(book.rating) : '0.0'}
                   </span>
                 </div>
 

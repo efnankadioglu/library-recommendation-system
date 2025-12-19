@@ -113,16 +113,33 @@ export async function getBooks(): Promise<Book[]> {
  * if (!response.ok) throw new Error('Failed to fetch book');
  * return response.json();
  */
+// export async function getBook(id: string): Promise<Book | null> {
+//   const response = await fetch(`${API_BASE_URL}/books/${id}`);
+
+//   if (response.status === 404) return null;
+
+//   if (!response.ok) {
+//     throw new Error('Failed to fetch book');
+//   }
+
+//   return response.json();
+// }
+
 export async function getBook(id: string): Promise<Book | null> {
   const response = await fetch(`${API_BASE_URL}/books/${id}`);
 
   if (response.status === 404) return null;
+  if (!response.ok) throw new Error('Failed to fetch book');
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch book');
-  }
+  // 1. Önce AWS'nin tüm yanıt paketini alıyoruz
+  const result = await response.json();
 
-  return response.json();
+  // 2. Eğer Lambda'dan 'body' gelmişse onu çıkartıyoruz, yoksa sonucu dönüyoruz
+  // Lambda bazen body'yi string olarak gönderir, bu yüzden JSON.parse yapmamız gerekebilir.
+  const bookData =
+    typeof result.body === 'string' ? JSON.parse(result.body) : result.body || result;
+
+  return bookData;
 }
 
 /**
@@ -136,7 +153,7 @@ export async function createBook(book: Omit<Book, 'id'>): Promise<Book> {
     setTimeout(() => {
       const newBook: Book = {
         ...book,
-        id: Date.now().toString(),
+        bookId: Date.now().toString(),
       };
       resolve(newBook);
     }, 500);
@@ -151,11 +168,11 @@ export async function updateBook(id: string, book: Partial<Book>): Promise<Book>
   // Şimdilik MOCK
   return new Promise((resolve) => {
     setTimeout(() => {
-      const existingBook = mockBooks.find((b) => b.id === id);
+      const existingBook = mockBooks.find((b) => b.bookId === id);
       const updatedBook: Book = {
         ...existingBook!,
         ...book,
-        id,
+        bookId: id,
       };
       resolve(updatedBook);
     }, 500);

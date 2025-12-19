@@ -68,7 +68,7 @@ import { Book, User, ReadingList } from '@/types';
  */
 export const mockBooks: Book[] = [
   {
-    id: '1',
+    bookId: '1',
     title: 'The Midnight Library',
     author: 'Matt Haig',
     genre: 'Fiction',
@@ -80,7 +80,7 @@ export const mockBooks: Book[] = [
     isbn: '978-0525559474',
   },
   {
-    id: '2',
+    bookId: '2',
     title: 'Project Hail Mary',
     author: 'Andy Weir',
     genre: 'Science Fiction',
@@ -92,7 +92,7 @@ export const mockBooks: Book[] = [
     isbn: '978-0593135204',
   },
   {
-    id: '3',
+    bookId: '3',
     title: 'The Silent Patient',
     author: 'Alex Michaelides',
     genre: 'Mystery',
@@ -104,7 +104,7 @@ export const mockBooks: Book[] = [
     isbn: '978-1250301697',
   },
   {
-    id: '4',
+    bookId: '4',
     title: 'People We Meet on Vacation',
     author: 'Emily Henry',
     genre: 'Romance',
@@ -115,7 +115,7 @@ export const mockBooks: Book[] = [
     isbn: '978-1984806758',
   },
   {
-    id: '5',
+    bookId: '5',
     title: 'Atomic Habits',
     author: 'James Clear',
     genre: 'Non-Fiction',
@@ -127,7 +127,7 @@ export const mockBooks: Book[] = [
     isbn: '978-0735211292',
   },
   {
-    id: '6',
+    bookId: '6',
     title: 'The Seven Husbands of Evelyn Hugo',
     author: 'Taylor Jenkins Reid',
     genre: 'Fiction',
@@ -139,7 +139,7 @@ export const mockBooks: Book[] = [
     isbn: '978-1501161933',
   },
   {
-    id: '7',
+    bookId: '7',
     title: 'Dune',
     author: 'Frank Herbert',
     genre: 'Science Fiction',
@@ -151,7 +151,7 @@ export const mockBooks: Book[] = [
     isbn: '978-0441172719',
   },
   {
-    id: '8',
+    bookId: '8',
     title: 'The Thursday Murder Club',
     author: 'Richard Osman',
     genre: 'Mystery',
@@ -163,7 +163,7 @@ export const mockBooks: Book[] = [
     isbn: '978-1984880987',
   },
   {
-    id: '9',
+    bookId: '9',
     title: 'Educated',
     author: 'Tara Westover',
     genre: 'Non-Fiction',
@@ -175,7 +175,7 @@ export const mockBooks: Book[] = [
     isbn: '978-0399590504',
   },
   {
-    id: '10',
+    bookId: '10',
     title: 'The Song of Achilles',
     author: 'Madeline Miller',
     genre: 'Fiction',

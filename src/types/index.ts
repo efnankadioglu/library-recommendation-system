@@ -12,7 +12,7 @@ export interface Book {
   description: string;
   coverImage: string;
   rating: number;
-  year: number; 
+  publishedYear: number;
 
   isbn: string;
 }

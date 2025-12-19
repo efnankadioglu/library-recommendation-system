@@ -20,7 +20,6 @@ export function BookDetail() {
     if (id) {
       loadBook(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   // const loadBook = async (bookId: string) => {
@@ -41,24 +40,19 @@ export function BookDetail() {
   const loadBook = async (bookId: string) => {
     setIsLoading(true);
     try {
-      // 1. AWS'den veriyi istiyoruz
       const data = await getBook(bookId);
-
-      // 🛡️ KRİTİK DEBUG: Tarayıcıda F12 -> Console sekmesinde bu satırı gör.
-      // Veri geliyorsa ama ekranda yoksa, buradaki isimlere bakacağız.
       console.log("AWS'den gelen ham veri:", data);
 
-      if (!data) {
-        navigate('/404');
-        return;
+      // 🛡️ KRİTİK DÜZELTME: Eğer AWS sana bir liste gönderirse, içinden doğru ID'yi seç
+      if (Array.isArray(data)) {
+        // Listenin içinde bizim bookId'mize (URL'deki 8 rakamı gibi) eşit olanı buluyoruz
+        const foundBook = data.find((b: any) => String(b.bookId) === String(bookId));
+        setBook(foundBook || null);
+      } else {
+        // Eğer AWS normaldeki gibi tek bir nesne gönderirse
+        setBook(data);
       }
-
-      // 2. Gelen veriyi 'book' durumuna kaydediyoruz.
-      // Eğer api.ts'de 'Item' ayıklamasını yaptıysan direkt data yazabilirsin.
-      setBook(data);
     } catch (error) {
-      // Hatayı konsola yazdırarak sebebini (Network mü, Veri mi) anlıyoruz.
-      console.error('Veri çekme sırasında bir hata oluştu:', error);
       handleApiError(error);
     } finally {
       setIsLoading(false);

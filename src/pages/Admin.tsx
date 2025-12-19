@@ -59,15 +59,35 @@ export function Admin() {
     }
   };
 
+  // const handleDeleteBook = async (id: string) => {
+  //   if (!confirm('Are you sure you want to delete this book?')) {
+  //     return;
+  //   }
+
+  //   try {
+  //     // TODO: Replace with Lambda API call
+  //     await deleteBook();
+  //     setBooks(books.filter((book) => book.id !== id));
+  //     showSuccess('Book deleted successfully!');
+  //   } catch (error) {
+  //     handleApiError(error);
+  //   }
+  // };
+
   const handleDeleteBook = async (id: string) => {
     if (!confirm('Are you sure you want to delete this book?')) {
       return;
     }
 
     try {
-      // TODO: Replace with Lambda API call
-      await deleteBook();
-      setBooks(books.filter((book) => book.id !== id));
+      // 1. DÜZELTME: Fonksiyona 'id' parametresini gönderiyoruz.
+      // Eski hali: await deleteBook(); -> Bu yüzden 'undefined' gidiyordu.
+      await deleteBook(id);
+
+      // 2. DÜZELTME: 'book.id' yerine 'book.bookId' kullanıyoruz.
+      // Veritabanında ve state içinde bu alanın adı 'bookId'.
+      setBooks(books.filter((book) => book.bookId !== id));
+
       showSuccess('Book deleted successfully!');
     } catch (error) {
       handleApiError(error);
@@ -143,7 +163,7 @@ export function Admin() {
               </thead>
               <tbody>
                 {books.map((book) => (
-                  <tr key={book.id} className="border-b hover:bg-slate-50">
+                  <tr key={book.bookId} className="border-b hover:bg-slate-50">
                     <td className="py-3 px-4">{book.title}</td>
                     <td className="py-3 px-4">{book.author}</td>
                     <td className="py-3 px-4">{book.genre}</td>
@@ -156,7 +176,7 @@ export function Admin() {
                         <Button
                           variant="danger"
                           size="sm"
-                          onClick={() => handleDeleteBook(book.id)}
+                          onClick={() => handleDeleteBook(book.bookId)}
                         >
                           Delete
                         </Button>

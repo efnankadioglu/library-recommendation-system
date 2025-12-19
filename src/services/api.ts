@@ -147,17 +147,46 @@ export async function getBook(id: string): Promise<Book | null> {
  *
  * TODO: Replace with real API call in Week 2, Day 5-7
  */
-export async function createBook(book: Omit<Book, 'id'>): Promise<Book> {
-  // Şimdilik MOCK
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newBook: Book = {
-        ...book,
-        bookId: Date.now().toString(),
-      };
-      resolve(newBook);
-    }, 500);
+// export async function createBook(book: Omit<Book, 'id'>): Promise<Book> {
+//   // Şimdilik MOCK
+//   return new Promise((resolve) => {
+//     setTimeout(() => {
+//       const newBook: Book = {
+//         ...book,
+//         bookId: Date.now().toString(),
+//       };
+//       resolve(newBook);
+//     }, 500);
+//   });
+// }
+
+export async function createBook(book: Omit<Book, 'bookId'>): Promise<Book> {
+  // 1. AWS API'mize POST isteği gönderiyoruz
+  const response = await fetch(`${API_BASE_URL}/books`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    // Kitap bilgilerini JSON formatına çevirip gönderiyoruz
+    body: JSON.stringify(book),
   });
+
+  if (!response.ok) {
+    throw new Error('Yeni kitap eklenirken bir hata oluştu. Lütfen AWS bağlantısını kontrol et!');
+  }
+
+  // 2. AWS'den gelen yanıtı (zarfı) alıyoruz
+  const result = await response.json();
+
+  // 3. Zarfın içindeki gerçek kitap verisini (body) çıkarıyoruz
+  const newBook = result.body
+    ? typeof result.body === 'string'
+      ? JSON.parse(result.body)
+      : result.body
+    : result;
+
+  console.log('Yeni kitap başarıyla eklendi:', newBook);
+  return newBook as Book;
 }
 
 /**
@@ -183,11 +212,26 @@ export async function updateBook(id: string, book: Partial<Book>): Promise<Book>
  * Delete a book (admin only)
  * TODO: Replace with DELETE /books/:id API call
  */
-export async function deleteBook(): Promise<void> {
-  // Şimdilik MOCK
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(), 300);
+// export async function deleteBook(): Promise<void> {
+//   // Şimdilik MOCK
+//   return new Promise((resolve) => {
+//     setTimeout(() => resolve(), 300);
+//   });
+// }
+export async function deleteBook(id: string): Promise<void> {
+  // AWS'ye "bu ID'li kitabı sil" emrini gönderiyoruz
+  const response = await fetch(`${API_BASE_URL}/books/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
+
+  if (!response.ok) {
+    throw new Error('Kitap silinirken AWS tarafında bir hata oluştu');
+  }
+
+  console.log(`${id} ID'li kitap AWS'den silindi.`);
 }
 
 /**

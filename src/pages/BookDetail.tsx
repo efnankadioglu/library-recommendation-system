@@ -46,7 +46,7 @@ export function BookDetail() {
       // 🛡️ KRİTİK DÜZELTME: Eğer AWS sana bir liste gönderirse, içinden doğru ID'yi seç
       if (Array.isArray(data)) {
         // Listenin içinde bizim bookId'mize (URL'deki 8 rakamı gibi) eşit olanı buluyoruz
-        const foundBook = data.find((b: any) => String(b.bookId) === String(bookId));
+        const foundBook = data.find((b: Book) => String(b.bookId) === String(bookId));
         setBook(foundBook || null);
       } else {
         // Eğer AWS normaldeki gibi tek bir nesne gönderirse

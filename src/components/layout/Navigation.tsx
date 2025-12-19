@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * Navigation component props
@@ -14,13 +15,19 @@ interface NavigationProps {
  * Responsive: horizontal on desktop, vertical on mobile
  */
 export function Navigation({ mobile = false }: NavigationProps) {
+  const { user } = useAuth(); // Kullanıcıyı aldık
+
   const links = [
     { to: '/', label: 'Home' },
     { to: '/books', label: 'Books' },
     { to: '/recommendations', label: 'Recommendations' },
     { to: '/reading-lists', label: 'Reading Lists' },
-    { to: '/admin', label: 'Admin' },
   ];
+
+  // Sadece admin ise Admin linkini listeye ekle
+  if (user?.role === 'admin') {
+    links.push({ to: '/admin', label: 'Admin' });
+  }
 
   const baseClasses = 'transition-all duration-300 font-semibold';
   const activeClasses = mobile

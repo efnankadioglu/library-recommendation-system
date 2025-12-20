@@ -1,5 +1,5 @@
 import { Book, ReadingList, Review, Recommendation } from '@/types';
-import { mockBooks, mockReadingLists } from './mockData';
+import { mockReadingLists } from './mockData';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 /**
@@ -35,7 +35,7 @@ import { fetchAuthSession } from 'aws-amplify/auth';
  * [x] Week 3: Configure Amplify in src/main.tsx
  * [x] Week 3: Update AuthContext with Cognito functions
  * [x] Week 3: Implement getAuthHeaders() function below
- * [ ] Week 3: Add Cognito authorizer to API Gateway
+ * [x] Week 3: Add Cognito authorizer to API Gateway
  * [ ] Week 4: Deploy Bedrock recommendations Lambda
  * [ ] Week 4: Update getRecommendations() function
  * [ ] Week 4: Remove all mock data returns
@@ -194,21 +194,33 @@ export async function createBook(book: Omit<Book, 'bookId'>): Promise<Book> {
 
 /**
  * Update an existing book (admin only)
- * TODO: Replace with PUT /books/:id API call
+ * ✅ Week 3: Now connected to AWS with PUT method and JWT Auth
  */
 export async function updateBook(id: string, book: Partial<Book>): Promise<Book> {
-  // Şimdilik MOCK
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const existingBook = mockBooks.find((b) => b.bookId === id);
-      const updatedBook: Book = {
-        ...existingBook!,
-        ...book,
-        bookId: id,
-      };
-      resolve(updatedBook);
-    }, 500);
+  console.log("🔥 updateBook called", { id, book });
+
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(`${API_BASE_URL}/books/${id}`, {
+    method: 'PUT',
+    headers: authHeaders,
+    body: JSON.stringify(book),
   });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Kitap güncellenemedi (${response.status}). ${text}`);
+  }
+
+  const result = await response.json();
+
+  const updatedBook = result.body
+    ? typeof result.body === 'string'
+      ? JSON.parse(result.body)
+      : result.body
+    : result;
+
+  return updatedBook as Book;
 }
 
 /**
@@ -300,10 +312,6 @@ export async function createReadingList(
   });
 }
 
-/**
- * Update a reading list
- * TODO: Replace with PUT /reading-lists/:id API call
- */
 export async function updateReadingList(
   id: string,
   list: Partial<ReadingList>
@@ -322,6 +330,7 @@ export async function updateReadingList(
     }, 500);
   });
 }
+
 
 /**
  * Delete a reading list

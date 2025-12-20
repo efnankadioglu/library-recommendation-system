@@ -5,17 +5,24 @@ import { Button } from '@/components/common/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { validateEmail, validatePassword, validateRequired } from '@/utils/validation';
 import { handleApiError } from '@/utils/errorHandling';
+import { signOut } from 'aws-amplify/auth';
+
 
 /**
  * Signup page component
  */
 export function Signup() {
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const { signup, confirmSignup } = useAuth(); // confirmSignup eklendi
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  const [isVerificationStep, setIsVerificationStep] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+
   const [errors, setErrors] = useState<{
     name?: string;
     email?: string;
@@ -62,12 +69,42 @@ export function Signup() {
     setIsLoading(true);
     try {
       await signup(email, password, name);
-      navigate('/');
+
+     //Instead of navigating to home, move to verification step
+      setIsVerificationStep(true);
+      setVerificationError(null);
+      return;
     } catch (error) {
       handleApiError(error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleConfirm = async () => {
+    if (!validateRequired(verificationCode)) {
+      setVerificationError('Verification code is required');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      setVerificationError(null);
+      await confirmSignup(email, verificationCode); 
+      await signOut();
+
+      navigate('/login');
+
+    } catch (error: unknown) {
+  const message =
+    error instanceof Error ? error.message : 'Verification failed';
+
+  setVerificationError(message);
+  handleApiError(error);
+} finally {
+  setIsLoading(false);
+}
+
   };
 
   return (
@@ -91,96 +128,142 @@ export function Signup() {
               </svg>
             </div>
           </div>
+
           <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
-            <span className="gradient-text">Create Account</span>
+            <span className="gradient-text">
+              {isVerificationStep ? 'Verify Account' : 'Create Account'}
+            </span>
           </h1>
-          <p className="text-slate-600 text-lg">Join us to discover your next favorite book</p>
+
+          <p className="text-slate-600 text-lg">
+            {isVerificationStep
+              ? `Enter the verification code sent to ${email}`
+              : 'Join us to discover your next favorite book'}
+          </p>
         </div>
 
         <div className="glass-effect rounded-3xl shadow-2xl border border-white/20 p-8">
-          <form onSubmit={handleSubmit}>
-            <Input
-              label="Full Name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              error={errors.name}
-              required
-              placeholder="John Doe"
-            />
+          {!isVerificationStep ? (
+            <form onSubmit={handleSubmit}>
+              <Input
+                label="Full Name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                error={errors.name}
+                required
+                placeholder="John Doe"
+              />
 
-            <Input
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              error={errors.email}
-              required
-              placeholder="you@example.com"
-            />
+              <Input
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                error={errors.email}
+                required
+                placeholder="you@example.com"
+              />
 
-            <Input
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={errors.password}
-              required
-              placeholder="••••••••"
-            />
+              <Input
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                error={errors.password}
+                required
+                placeholder="••••••••"
+              />
 
-            <Input
-              label="Confirm Password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              error={errors.confirmPassword}
-              required
-              placeholder="••••••••"
-            />
+              <Input
+                label="Confirm Password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                error={errors.confirmPassword}
+                required
+                placeholder="••••••••"
+              />
 
-            <div className="mb-6">
-              <label className="flex items-start cursor-pointer group">
-                <input
-                  type="checkbox"
-                  className="mt-1 mr-2 w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
-                  required
-                />
-                <span className="text-sm text-slate-600 group-hover:text-slate-900">
-                  I agree to the{' '}
-                  <Link to="/terms" className="text-violet-600 hover:text-violet-700 font-semibold">
-                    Terms of Service
-                  </Link>{' '}
-                  and{' '}
-                  <Link
-                    to="/privacy"
-                    className="text-violet-600 hover:text-violet-700 font-semibold"
-                  >
-                    Privacy Policy
-                  </Link>
-                </span>
-              </label>
+              <div className="mb-6">
+                <label className="flex items-start cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    className="mt-1 mr-2 w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                    required
+                  />
+                  <span className="text-sm text-slate-600 group-hover:text-slate-900">
+                    I agree to the{' '}
+                    <Link to="/terms" className="text-violet-600 hover:text-violet-700 font-semibold">
+                      Terms of Service
+                    </Link>{' '}
+                    and{' '}
+                    <Link
+                      to="/privacy"
+                      className="text-violet-600 hover:text-violet-700 font-semibold"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </span>
+                </label>
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Creating account...' : 'Sign Up'}
+              </Button>
+            </form>
+          ) : (
+            <div>
+              <Input
+                label="Verification Code"
+                type="text"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                error={verificationError ?? undefined}
+                required
+                placeholder="123456"
+              />
+
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                className="w-full"
+                disabled={isLoading}
+                onClick={handleConfirm}
+              >
+                {isLoading ? 'Verifying...' : 'Verify'}
+              </Button>
+
+              <div className="mt-6 text-center">
+                <button
+                  type="button"
+                  className="text-sm text-slate-600 hover:text-slate-900 underline"
+                  onClick={() => setIsVerificationStep(false)}
+                  disabled={isLoading}
+                >
+                  Back to sign up
+                </button>
+              </div>
             </div>
+          )}
 
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Creating account...' : 'Sign Up'}
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-slate-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-violet-600 hover:text-violet-700 font-semibold">
-                Sign in
-              </Link>
-            </p>
-          </div>
+          {!isVerificationStep && (
+            <div className="mt-6 text-center">
+              <p className="text-sm text-slate-600">
+                Already have an account?{' '}
+                <Link to="/login" className="text-violet-600 hover:text-violet-700 font-semibold">
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

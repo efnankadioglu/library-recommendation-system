@@ -3,7 +3,7 @@ import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Modal } from '@/components/common/Modal';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { getBooks, createBook, deleteBook } from '@/services/api';
+import { getBooks, createBook, deleteBook, updateBook } from '@/services/api';
 import { Book } from '@/types';
 import { handleApiError, showSuccess } from '@/utils/errorHandling';
 
@@ -15,6 +15,19 @@ export function Admin() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newBook, setNewBook] = useState({
+    title: '',
+    author: '',
+    genre: '',
+    description: '',
+    coverImage: '',
+    rating: 0,
+    publishedYear: new Date().getFullYear(),
+    isbn: '',
+  });
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editBookId, setEditBookId] = useState<string | null>(null);
+  const [editBook, setEditBook] = useState({
     title: '',
     author: '',
     genre: '',
@@ -89,6 +102,37 @@ export function Admin() {
       setBooks(books.filter((book) => book.bookId !== id));
 
       showSuccess('Book deleted successfully!');
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
+
+  // Düzenleme Modalı Açma Fonksiyonu
+  const openEditModal = (book: Book) => {
+    setEditBookId(book.bookId);
+    setEditBook({
+      title: book.title || '',
+      author: book.author || '',
+      genre: book.genre || '',
+      description: book.description || '',
+      coverImage: book.coverImage || '',
+      rating: book.rating ?? 0,
+      publishedYear: book.publishedYear ?? new Date().getFullYear(),
+      isbn: book.isbn || '',
+    });
+    setIsEditModalOpen(true);
+  };
+
+  // AWS'ye Güncelleme İsteği Atan Fonksiyon
+  const handleUpdateBook = async () => {
+    if (!editBookId) return;
+    try {
+      const updated = await updateBook(editBookId, editBook);
+      setBooks((prev) =>
+        prev.map((b) => (b.bookId === editBookId ? { ...b, ...updated } : b))
+      );
+      setIsEditModalOpen(false);
+      showSuccess('Book updated successfully!');
     } catch (error) {
       handleApiError(error);
     }
@@ -170,7 +214,8 @@ export function Admin() {
                     <td className="py-3 px-4">{book.rating}</td>
                     <td className="py-3 px-4">
                       <div className="flex gap-2">
-                        <Button variant="secondary" size="sm">
+                        {/* Edit butonu artık fonksiyonu çağırıyor */}
+                        <Button variant="secondary" size="sm" onClick={() => openEditModal(book)}>
                           Edit
                         </Button>
                         <Button
@@ -266,6 +311,28 @@ export function Admin() {
             </div>
           </div>
         </Modal>
+
+        {/* Edit Book Modal */}
+        <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Book">
+          <div className="max-h-[60vh] overflow-y-auto p-1">
+            <Input label="Title" type="text" value={editBook.title} onChange={(e) => setEditBook({ ...editBook, title: e.target.value })} required />
+            <Input label="Author" type="text" value={editBook.author} onChange={(e) => setEditBook({ ...editBook, author: e.target.value })} required />
+            <Input label="Genre" type="text" value={editBook.genre} onChange={(e) => setEditBook({ ...editBook, genre: e.target.value })} required />
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+              <textarea value={editBook.description} onChange={(e) => setEditBook({ ...editBook, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg min-h-[100px] resize-none" />
+            </div>
+            <Input label="Cover Image URL" type="text" value={editBook.coverImage} onChange={(e) => setEditBook({ ...editBook, coverImage: e.target.value })} />
+            <Input label="Rating" type="number" min="0" max="5" step="0.1" value={editBook.rating} onChange={(e) => setEditBook({ ...editBook, rating: parseFloat(e.target.value) })} />
+            <Input label="Published Year" type="number" value={editBook.publishedYear} onChange={(e) => setEditBook({ ...editBook, publishedYear: parseInt(e.target.value) })} />
+            <Input label="ISBN" type="text" value={editBook.isbn} onChange={(e) => setEditBook({ ...editBook, isbn: e.target.value })} />
+            <div className="flex gap-3 mt-6">
+              <Button variant="primary" onClick={handleUpdateBook} className="flex-1">Save Changes</Button>
+              <Button variant="secondary" onClick={() => setIsEditModalOpen(false)} className="flex-1">Cancel</Button>
+            </div>
+          </div>
+        </Modal>
+
       </div>
     </div>
   );

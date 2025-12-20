@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useEffect } from 'react';
 import { User } from '@/types';
-import { signIn, signUp, signOut, getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
+import { signIn, signUp, signOut, getCurrentUser, fetchUserAttributes, confirmSignUp } from 'aws-amplify/auth';
 
 /**
  * Authentication context type definition
@@ -13,6 +13,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
+  confirmSignup: (username: string, code: string) => Promise<void>;
 }
 
 /**
@@ -171,6 +172,13 @@ const signup = async (email: string, password: string, name: string) => {
     }
   };
 
+  const confirmSignup = async (username: string, code: string) => {
+    await confirmSignUp({
+      username,
+      confirmationCode: code
+    });
+  };
+
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
@@ -178,7 +186,10 @@ const signup = async (email: string, password: string, name: string) => {
     login,
     logout,
     signup,
+    confirmSignup // DÜZELTME: Value objesine eklendi
   };
+
+
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

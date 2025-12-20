@@ -1,5 +1,6 @@
 import { Book, ReadingList, Review, Recommendation } from '@/types';
 import { mockBooks, mockReadingLists } from './mockData';
+import { fetchAuthSession } from 'aws-amplify/auth';
 
 /**
  * ============================================================================
@@ -29,11 +30,11 @@ import { mockBooks, mockReadingLists } from './mockData';
  * [x] Week 2: Deploy Lambda function for Books API
  * [x] Week 2: Deploy API Gateway endpoint: GET /books
  * [x] Week 2: Set VITE_API_BASE_URL in .env file
- * [ ] Week 3: Set up Cognito User Pool
- * [ ] Week 3: Install aws-amplify: npm install aws-amplify
- * [ ] Week 3: Configure Amplify in src/main.tsx
- * [ ] Week 3: Update AuthContext with Cognito functions
- * [ ] Week 3: Implement getAuthHeaders() function below
+ * [x] Week 3: Set up Cognito User Pool
+ * [x] Week 3: Install aws-amplify: npm install aws-amplify
+ * [x] Week 3: Configure Amplify in src/main.tsx
+ * [x] Week 3: Update AuthContext with Cognito functions
+ * [x] Week 3: Implement getAuthHeaders() function below
  * [ ] Week 3: Add Cognito authorizer to API Gateway
  * [ ] Week 4: Deploy Bedrock recommendations Lambda
  * [ ] Week 4: Update getRecommendations() function
@@ -59,20 +60,24 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
  *
  * See IMPLEMENTATION_GUIDE.md - Week 3, Day 5-7 for complete code.
  */
-// async function getAuthHeaders() {
-//   try {
-//     const session = await fetchAuthSession();
-//     const token = session.tokens?.idToken?.toString();
-//     return {
-//       Authorization: `Bearer ${token}`,
-//       'Content-Type': 'application/json',
-//     };
-//   } catch {
-//     return {
-//       'Content-Type': 'application/json',
-//     };
-//   }
-// }
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  try {
+    const session = await fetchAuthSession();
+    // Token varsa al, yoksa boş string ata
+    const token = session.tokens?.idToken?.toString() || '';
+    
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  } catch (error) {
+    console.error('Auth headers error:', error);
+    return {
+      'Content-Type': 'application/json',
+    };
+  }
+}
 
 /**
  * Get all books from the catalog
@@ -161,13 +166,11 @@ export async function getBook(id: string): Promise<Book | null> {
 // }
 
 export async function createBook(book: Omit<Book, 'bookId'>): Promise<Book> {
-  // 1. AWS API'mize POST isteği gönderiyoruz
+  const authHeaders = await getAuthHeaders(); // Token'ı alıyoruz
+  
   const response = await fetch(`${API_BASE_URL}/books`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    // Kitap bilgilerini JSON formatına çevirip gönderiyoruz
+    headers: authHeaders, // Artık içinde Authorization var!
     body: JSON.stringify(book),
   });
 
@@ -219,12 +222,11 @@ export async function updateBook(id: string, book: Partial<Book>): Promise<Book>
 //   });
 // }
 export async function deleteBook(id: string): Promise<void> {
-  // AWS'ye "bu ID'li kitabı sil" emrini gönderiyoruz
+  const authHeaders = await getAuthHeaders(); // Token'ı alıyoruz
+  
   const response = await fetch(`${API_BASE_URL}/books/${id}`, {
     method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: authHeaders, // Artık içinde Authorization var!
   });
 
   if (!response.ok) {

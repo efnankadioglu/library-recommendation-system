@@ -24,8 +24,8 @@ export function Navigation({ mobile = false }: NavigationProps) {
     { to: '/reading-lists', label: 'Reading Lists' },
   ];
 
-  // Sadece admin ise Admin linkini listeye ekle
-  if (user?.role === 'admin') {
+  // Giriş yapmış her kullanıcı Admin panelini menüde görebilsin
+  if (user) {
     links.push({ to: '/admin', label: 'Admin' });
   }
 

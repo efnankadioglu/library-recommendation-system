@@ -1,4 +1,4 @@
-import { Book, ReadingList, Review, Recommendation } from '@/types';
+import { Book, ReadingList, Review } from '@/types';
 import { mockReadingLists } from './mockData';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
@@ -250,32 +250,35 @@ export async function deleteBook(id: string): Promise<void> {
 
 /**
  * Get AI-powered book recommendations using Amazon Bedrock
- *
- * TODO: Replace with real API call in Week 4, Day 1-2
+ * Week 4: Connected to REAL AWS Bedrock API
  */
-export async function getRecommendations(): Promise<Recommendation[]> {
-  // Şimdilik MOCK
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const mockRecommendations: Recommendation[] = [
-        {
-          id: '1',
-          bookId: '1',
-          reason:
-            'Based on your interest in philosophical fiction, this book explores themes of choice and regret.',
-          confidence: 0.92,
-        },
-        {
-          id: '2',
-          bookId: '2',
-          reason:
-            'If you enjoy science-based thrillers, this space adventure combines humor with hard science.',
-          confidence: 0.88,
-        },
-      ];
-      resolve(mockRecommendations);
-    }, 1000);
-  });
+export async function getRecommendations(favoriteGenres: string = 'Genel'): Promise<string> {
+  try {
+    const authHeaders = await getAuthHeaders();
+
+    const response = await fetch(`${API_BASE_URL}/recommendations`, {
+      method: 'POST',
+      headers: {
+        ...authHeaders,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ favoriteGenres }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`AI Önerisi alınamadı: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    // Lambda'dan dönen recommendations metnini string olarak döndürüyoruz
+    return typeof result.recommendations === 'string' 
+      ? result.recommendations 
+      : JSON.stringify(result.recommendations || result);
+  } catch (error) {
+    console.error("Bedrock API Hatası:", error);
+    return "Şu an öneri oluşturulamıyor, lütfen daha sonra tekrar deneyin.";
+  }
 }
 
 /**

@@ -18,7 +18,7 @@ export function BookDetail() {
   const navigate = useNavigate();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [isListModalOpen, setIsListModalOpen] = useState(false);
   const [userLists, setUserLists] = useState<ReadingList[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -29,33 +29,16 @@ export function BookDetail() {
     }
   }, [id]);
 
-  // const loadBook = async (bookId: string) => {
-  //   setIsLoading(true);
-  //   try {
-  //     const data = await getBook(bookId);
-  //     if (!data) {
-  //       navigate('/404');
-  //       return;
-  //     }
-  //     setBook(data);
-  //   } catch (error) {
-  //     handleApiError(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
   const loadBook = async (bookId: string) => {
     setIsLoading(true);
     try {
       const data = await getBook(bookId);
       console.log("AWS'den gelen ham veri:", data);
 
-      
       if (Array.isArray(data)) {
         const foundBook = data.find((b: Book) => String(b.bookId) === String(bookId));
         setBook(foundBook || null);
       } else {
-        // Eğer AWS normaldeki gibi tek bir nesne gönderirse
         setBook(data);
       }
     } catch (error) {
@@ -66,9 +49,7 @@ export function BookDetail() {
   };
 
   // TODO: Implement add to reading list functionality
-  // ESKİ HALİ: const handleAddToList = () => { alert('Add to reading list functionality coming soon!'); };
-  
-  // YENİ FONKSİYONLAR:
+
   const handleAddToList = async () => {
     if (!user) {
       alert('You must be logged in to manage reading lists.');
@@ -87,7 +68,7 @@ export function BookDetail() {
 
   const handleSelectAndAddToList = async (list: ReadingList) => {
     if (!book) return;
-    
+
     if (list.bookIds.includes(book.bookId)) {
       alert('This book is already in this list!');
       return;
@@ -258,7 +239,9 @@ export function BookDetail() {
         >
           <div className="space-y-3">
             {userLists.length === 0 ? (
-              <p className="text-center text-slate-500 py-4">No lists found. Please create one in Reading Lists page.</p>
+              <p className="text-center text-slate-500 py-4">
+                No lists found. Please create one in Reading Lists page.
+              </p>
             ) : (
               userLists.map((list) => (
                 <button
@@ -268,16 +251,32 @@ export function BookDetail() {
                   className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-violet-500 hover:bg-violet-50 transition-all group"
                 >
                   <div className="text-left">
-                    <p className="font-bold text-slate-900 group-hover:text-violet-700">{list.name}</p>
+                    <p className="font-bold text-slate-900 group-hover:text-violet-700">
+                      {list.name}
+                    </p>
                     <p className="text-xs text-slate-500">{list.bookIds.length} books</p>
                   </div>
-                  <svg className="w-5 h-5 text-slate-400 group-hover:text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  <svg
+                    className="w-5 h-5 text-slate-400 group-hover:text-violet-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
                   </svg>
                 </button>
               ))
             )}
-            <Button variant="secondary" className="w-full mt-4" onClick={() => navigate('/reading-lists')}>
+            <Button
+              variant="secondary"
+              className="w-full mt-4"
+              onClick={() => navigate('/reading-lists')}
+            >
               Go to Reading Lists
             </Button>
           </div>

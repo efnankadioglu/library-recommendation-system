@@ -72,33 +72,14 @@ export function Admin() {
     }
   };
 
-  // const handleDeleteBook = async (id: string) => {
-  //   if (!confirm('Are you sure you want to delete this book?')) {
-  //     return;
-  //   }
-
-  //   try {
-  //     // TODO: Replace with Lambda API call
-  //     await deleteBook();
-  //     setBooks(books.filter((book) => book.id !== id));
-  //     showSuccess('Book deleted successfully!');
-  //   } catch (error) {
-  //     handleApiError(error);
-  //   }
-  // };
-
   const handleDeleteBook = async (id: string) => {
     if (!confirm('Are you sure you want to delete this book?')) {
       return;
     }
 
     try {
-      // 1. DÜZELTME: Fonksiyona 'id' parametresini gönderiyoruz.
-      // Eski hali: await deleteBook(); -> Bu yüzden 'undefined' gidiyordu.
       await deleteBook(id);
 
-      // 2. DÜZELTME: 'book.id' yerine 'book.bookId' kullanıyoruz.
-      // Veritabanında ve state içinde bu alanın adı 'bookId'.
       setBooks(books.filter((book) => book.bookId !== id));
 
       showSuccess('Book deleted successfully!');
@@ -107,7 +88,6 @@ export function Admin() {
     }
   };
 
-  // Düzenleme Modalı Açma Fonksiyonu
   const openEditModal = (book: Book) => {
     setEditBookId(book.bookId);
     setEditBook({
@@ -123,14 +103,11 @@ export function Admin() {
     setIsEditModalOpen(true);
   };
 
-  // AWS'ye Güncelleme İsteği Atan Fonksiyon
   const handleUpdateBook = async () => {
     if (!editBookId) return;
     try {
       const updated = await updateBook(editBookId, editBook);
-      setBooks((prev) =>
-        prev.map((b) => (b.bookId === editBookId ? { ...b, ...updated } : b))
-      );
+      setBooks((prev) => prev.map((b) => (b.bookId === editBookId ? { ...b, ...updated } : b)));
       setIsEditModalOpen(false);
       showSuccess('Book updated successfully!');
     } catch (error) {
@@ -315,24 +292,78 @@ export function Admin() {
         {/* Edit Book Modal */}
         <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Book">
           <div className="max-h-[60vh] overflow-y-auto p-1">
-            <Input label="Title" type="text" value={editBook.title} onChange={(e) => setEditBook({ ...editBook, title: e.target.value })} required />
-            <Input label="Author" type="text" value={editBook.author} onChange={(e) => setEditBook({ ...editBook, author: e.target.value })} required />
-            <Input label="Genre" type="text" value={editBook.genre} onChange={(e) => setEditBook({ ...editBook, genre: e.target.value })} required />
+            <Input
+              label="Title"
+              type="text"
+              value={editBook.title}
+              onChange={(e) => setEditBook({ ...editBook, title: e.target.value })}
+              required
+            />
+            <Input
+              label="Author"
+              type="text"
+              value={editBook.author}
+              onChange={(e) => setEditBook({ ...editBook, author: e.target.value })}
+              required
+            />
+            <Input
+              label="Genre"
+              type="text"
+              value={editBook.genre}
+              onChange={(e) => setEditBook({ ...editBook, genre: e.target.value })}
+              required
+            />
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-              <textarea value={editBook.description} onChange={(e) => setEditBook({ ...editBook, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg min-h-[100px] resize-none" />
+              <textarea
+                value={editBook.description}
+                onChange={(e) => setEditBook({ ...editBook, description: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg min-h-[100px] resize-none"
+              />
             </div>
-            <Input label="Cover Image URL" type="text" value={editBook.coverImage} onChange={(e) => setEditBook({ ...editBook, coverImage: e.target.value })} />
-            <Input label="Rating" type="number" min="0" max="5" step="0.1" value={editBook.rating} onChange={(e) => setEditBook({ ...editBook, rating: parseFloat(e.target.value) })} />
-            <Input label="Published Year" type="number" value={editBook.publishedYear} onChange={(e) => setEditBook({ ...editBook, publishedYear: parseInt(e.target.value) })} />
-            <Input label="ISBN" type="text" value={editBook.isbn} onChange={(e) => setEditBook({ ...editBook, isbn: e.target.value })} />
+            <Input
+              label="Cover Image URL"
+              type="text"
+              value={editBook.coverImage}
+              onChange={(e) => setEditBook({ ...editBook, coverImage: e.target.value })}
+            />
+            <Input
+              label="Rating"
+              type="number"
+              min="0"
+              max="5"
+              step="0.1"
+              value={editBook.rating}
+              onChange={(e) => setEditBook({ ...editBook, rating: parseFloat(e.target.value) })}
+            />
+            <Input
+              label="Published Year"
+              type="number"
+              value={editBook.publishedYear}
+              onChange={(e) =>
+                setEditBook({ ...editBook, publishedYear: parseInt(e.target.value) })
+              }
+            />
+            <Input
+              label="ISBN"
+              type="text"
+              value={editBook.isbn}
+              onChange={(e) => setEditBook({ ...editBook, isbn: e.target.value })}
+            />
             <div className="flex gap-3 mt-6">
-              <Button variant="primary" onClick={handleUpdateBook} className="flex-1">Save Changes</Button>
-              <Button variant="secondary" onClick={() => setIsEditModalOpen(false)} className="flex-1">Cancel</Button>
+              <Button variant="primary" onClick={handleUpdateBook} className="flex-1">
+                Save Changes
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setIsEditModalOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
             </div>
           </div>
         </Modal>
-
       </div>
     </div>
   );

@@ -1,7 +1,14 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useEffect } from 'react';
 import { User } from '@/types';
-import { signIn, signUp, signOut, getCurrentUser, fetchUserAttributes, confirmSignUp } from 'aws-amplify/auth';
+import {
+  signIn,
+  signUp,
+  signOut,
+  getCurrentUser,
+  fetchUserAttributes,
+  confirmSignUp,
+} from 'aws-amplify/auth';
 
 /**
  * Authentication context type definition
@@ -102,7 +109,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           email: attributes.email || '',
           name: attributes.name || currentUser.username,
           role: 'user',
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         });
       } catch {
         setUser(null);
@@ -139,8 +146,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = async () => {
     setIsLoading(true);
     try {
-      await signOut(); // AWS oturumunu kapatır
-      setUser(null);   // Uygulama içindeki kullanıcıyı siler
+      await signOut();
+      setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
@@ -149,7 +156,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-const signup = async (email: string, password: string, name: string) => {
+  const signup = async (email: string, password: string, name: string) => {
     setIsLoading(true);
     try {
       await signUp({
@@ -158,12 +165,13 @@ const signup = async (email: string, password: string, name: string) => {
         options: {
           userAttributes: {
             email,
-            name
-          }
-        }
+            name,
+          },
+        },
       });
-      // Kayıt başarılı olduğunda kullanıcıya bilgi veriyoruz
-      alert("Signup successful! Please check your email for the verification code and confirm it via AWS console.");
+      alert(
+        'Signup successful! Please check your email for the verification code and confirm it via AWS console.'
+      );
     } catch (error) {
       console.error('Signup error:', error);
       throw error;
@@ -175,7 +183,7 @@ const signup = async (email: string, password: string, name: string) => {
   const confirmSignup = async (username: string, code: string) => {
     await confirmSignUp({
       username,
-      confirmationCode: code
+      confirmationCode: code,
     });
   };
 
@@ -186,10 +194,8 @@ const signup = async (email: string, password: string, name: string) => {
     login,
     logout,
     signup,
-    confirmSignup // DÜZELTME: Value objesine eklendi
+    confirmSignup,
   };
-
-
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

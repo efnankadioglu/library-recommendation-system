@@ -3,9 +3,7 @@
  */
 
 export interface Book {
-  // DynamoDB'den gelen gerçek anahtar adi budur.
-  bookId: string; // <-- ID alanını 'bookId' olarak değiştirdik
-
+  bookId: string;
   title: string;
   author: string;
   genre: string;
@@ -13,7 +11,6 @@ export interface Book {
   coverImage: string;
   rating: number;
   publishedYear: number;
-
   isbn: string;
 }
 

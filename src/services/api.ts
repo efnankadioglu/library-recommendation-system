@@ -65,7 +65,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     const session = await fetchAuthSession();
     const token = session.tokens?.idToken?.toString();
 
-    console.log("AWS'ye gönderilen (ID) Token:", token); 
+    console.log("AWS'ye gönderilen (ID) Token:", token);
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -82,14 +82,14 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   }
 }
 
-// ✅ Tek yerde güvenli unwrap (API Gateway proxy "body" dönebiliyor)
 async function unwrapJson<T>(response: Response): Promise<T> {
   const result = await response.json();
 
-  const payload =
-    result?.body
-      ? (typeof result.body === 'string' ? JSON.parse(result.body) : result.body)
-      : result;
+  const payload = result?.body
+    ? typeof result.body === 'string'
+      ? JSON.parse(result.body)
+      : result.body
+    : result;
 
   return payload as T;
 }
@@ -110,11 +110,9 @@ export async function getBooks(): Promise<Book[]> {
   const response = await fetch(`${API_BASE_URL}/books`);
 
   if (!response.ok) {
-    // İstersen burada console.error ile detay da yazabilirsin
     throw new Error('Failed to fetch books');
   }
 
-  // API Gateway + Lambda'dan gelen JSON Book[]
   return response.json();
 }
 
@@ -151,11 +149,7 @@ export async function getBook(id: string): Promise<Book | null> {
   if (response.status === 404) return null;
   if (!response.ok) throw new Error('Failed to fetch book');
 
-  // 1. Önce AWS'nin tüm yanıt paketini alıyoruz
   const result = await response.json();
-
-  // 2. Eğer Lambda'dan 'body' gelmişse onu çıkartıyoruz, yoksa sonucu dönüyoruz
-  // Lambda bazen body'yi string olarak gönderir, bu yüzden JSON.parse yapmamız gerekebilir.
   const bookData =
     typeof result.body === 'string' ? JSON.parse(result.body) : result.body || result;
 
@@ -182,7 +176,7 @@ export async function getBook(id: string): Promise<Book | null> {
 
 export async function createBook(book: Omit<Book, 'bookId'>): Promise<Book> {
   const authHeaders = await getAuthHeaders(); // Token'ı alıyoruz
-  
+
   const response = await fetch(`${API_BASE_URL}/books`, {
     method: 'POST',
     headers: authHeaders, // Artık içinde Authorization var!
@@ -193,10 +187,8 @@ export async function createBook(book: Omit<Book, 'bookId'>): Promise<Book> {
     throw new Error('Yeni kitap eklenirken bir hata oluştu. Lütfen AWS bağlantısını kontrol et!');
   }
 
-  // 2. AWS'den gelen yanıtı (zarfı) alıyoruz
   const result = await response.json();
 
-  // 3. Zarfın içindeki gerçek kitap verisini (body) çıkarıyoruz
   const newBook = result.body
     ? typeof result.body === 'string'
       ? JSON.parse(result.body)
@@ -212,7 +204,7 @@ export async function createBook(book: Omit<Book, 'bookId'>): Promise<Book> {
  * ✅ Week 3: Now connected to AWS with PUT method and JWT Auth
  */
 export async function updateBook(id: string, book: Partial<Book>): Promise<Book> {
-  console.log("updateBook called", { id, book });
+  console.log('updateBook called', { id, book });
 
   const authHeaders = await getAuthHeaders();
 
@@ -250,7 +242,7 @@ export async function updateBook(id: string, book: Partial<Book>): Promise<Book>
 // }
 export async function deleteBook(id: string): Promise<void> {
   const authHeaders = await getAuthHeaders(); // Token'ı alıyoruz
-  
+
   const response = await fetch(`${API_BASE_URL}/books/${id}`, {
     method: 'DELETE',
     headers: authHeaders, // Artık içinde Authorization var!
@@ -284,16 +276,14 @@ export async function getRecommendations(favoriteGenres: string = 'Genel'): Prom
       throw new Error(`AI Önerisi alınamadı: ${response.status}`);
     }
 
-    // API Gateway proxy "body" dönebileceği için unwrap ediyoruz
     const data = await unwrapJson<{ recommendations?: string }>(response);
 
-    // Lambda'dan dönen recommendations metnini string olarak döndürüyoruz
-    return typeof data.recommendations === 'string' 
-      ? data.recommendations 
+    return typeof data.recommendations === 'string'
+      ? data.recommendations
       : JSON.stringify(data.recommendations || data);
   } catch (error) {
-    console.error("Bedrock API Hatası:", error);
-    return "Şu an öneri oluşturulamıyor, lütfen daha sonra tekrar deneyin.";
+    console.error('Bedrock API Hatası:', error);
+    return 'Şu an öneri oluşturulamıyor, lütfen daha sonra tekrar deneyin.';
   }
 }
 
@@ -316,11 +306,8 @@ export async function getReadingLists(): Promise<ReadingList[]> {
 
   const result = await response.json();
 
-  return typeof result.body === 'string'
-    ? JSON.parse(result.body)
-    : result.body ?? result;
+  return typeof result.body === 'string' ? JSON.parse(result.body) : (result.body ?? result);
 }
-
 
 /**
  * Create a new reading list
@@ -345,12 +332,10 @@ export async function createReadingList(
 
   const result = await response.json();
 
-  const created =
-    typeof result.body === 'string' ? JSON.parse(result.body) : result.body || result;
+  const created = typeof result.body === 'string' ? JSON.parse(result.body) : result.body || result;
 
   return created as ReadingList;
 }
-
 
 export async function updateReadingList(
   id: string,
@@ -371,13 +356,10 @@ export async function updateReadingList(
 
   const result = await response.json();
 
-  const updated =
-    typeof result.body === 'string' ? JSON.parse(result.body) : result.body || result;
+  const updated = typeof result.body === 'string' ? JSON.parse(result.body) : result.body || result;
 
   return updated as ReadingList;
 }
-
-
 
 /**
  * Delete a reading list
@@ -396,7 +378,6 @@ export async function deleteReadingList(id: string): Promise<void> {
     throw new Error(`Reading list silinemedi (${response.status}). ${text}`);
   }
 }
-
 
 /**
  * Get reviews for a book
@@ -438,4 +419,3 @@ export async function createReview(review: Omit<Review, 'id' | 'createdAt'>): Pr
     }, 500);
   });
 }
-

@@ -7,13 +7,12 @@ import { validateEmail, validatePassword, validateRequired } from '@/utils/valid
 import { handleApiError } from '@/utils/errorHandling';
 import { signOut } from 'aws-amplify/auth';
 
-
 /**
  * Signup page component
  */
 export function Signup() {
   const navigate = useNavigate();
-  const { signup, confirmSignup } = useAuth(); // confirmSignup eklendi
+  const { signup, confirmSignup } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -70,7 +69,7 @@ export function Signup() {
     try {
       await signup(email, password, name);
 
-     //Instead of navigating to home, move to verification step
+      //Instead of navigating to home, move to verification step
       setIsVerificationStep(true);
       setVerificationError(null);
       return;
@@ -90,21 +89,18 @@ export function Signup() {
     setIsLoading(true);
     try {
       setVerificationError(null);
-      await confirmSignup(email, verificationCode); 
+      await confirmSignup(email, verificationCode);
       await signOut();
 
       navigate('/login');
-
     } catch (error: unknown) {
-  const message =
-    error instanceof Error ? error.message : 'Verification failed';
+      const message = error instanceof Error ? error.message : 'Verification failed';
 
-  setVerificationError(message);
-  handleApiError(error);
-} finally {
-  setIsLoading(false);
-}
-
+      setVerificationError(message);
+      handleApiError(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -194,7 +190,10 @@ export function Signup() {
                   />
                   <span className="text-sm text-slate-600 group-hover:text-slate-900">
                     I agree to the{' '}
-                    <Link to="/terms" className="text-violet-600 hover:text-violet-700 font-semibold">
+                    <Link
+                      to="/terms"
+                      className="text-violet-600 hover:text-violet-700 font-semibold"
+                    >
                       Terms of Service
                     </Link>{' '}
                     and{' '}

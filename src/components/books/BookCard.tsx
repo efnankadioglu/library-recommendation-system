@@ -20,7 +20,6 @@ export function BookCard({ book }: BookCardProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    // navigate(`/books/${book.id}`);
     navigate(`/books/${book.bookId}`);
   };
 

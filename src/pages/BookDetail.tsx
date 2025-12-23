@@ -2,19 +2,26 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { getBook } from '@/services/api';
-import { Book } from '@/types';
+import { Modal } from '@/components/common/Modal'; // Modal eklendi
+import { getBook, getReadingLists, updateReadingList } from '@/services/api'; // API fonksiyonları eklendi
+import { Book, ReadingList } from '@/types';
 import { formatRating } from '@/utils/formatters';
-import { handleApiError } from '@/utils/errorHandling';
+import { handleApiError, showSuccess } from '@/utils/errorHandling'; // showSuccess eklendi
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * BookDetail page component
  */
 export function BookDetail() {
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [isListModalOpen, setIsListModalOpen] = useState(false);
+  const [userLists, setUserLists] = useState<ReadingList[]>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -43,9 +50,8 @@ export function BookDetail() {
       const data = await getBook(bookId);
       console.log("AWS'den gelen ham veri:", data);
 
-      // 🛡️ KRİTİK DÜZELTME: Eğer AWS sana bir liste gönderirse, içinden doğru ID'yi seç
+      
       if (Array.isArray(data)) {
-        // Listenin içinde bizim bookId'mize (URL'deki 8 rakamı gibi) eşit olanı buluyoruz
         const foundBook = data.find((b: Book) => String(b.bookId) === String(bookId));
         setBook(foundBook || null);
       } else {
@@ -60,8 +66,44 @@ export function BookDetail() {
   };
 
   // TODO: Implement add to reading list functionality
-  const handleAddToList = () => {
-    alert('Add to reading list functionality coming soon!');
+  // ESKİ HALİ: const handleAddToList = () => { alert('Add to reading list functionality coming soon!'); };
+  
+  // YENİ FONKSİYONLAR:
+  const handleAddToList = async () => {
+    if (!user) {
+      alert('You must be logged in to manage reading lists.');
+      navigate('/login');
+      return;
+    }
+
+    setIsListModalOpen(true);
+    try {
+      const lists = await getReadingLists();
+      setUserLists(lists);
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
+
+  const handleSelectAndAddToList = async (list: ReadingList) => {
+    if (!book) return;
+    
+    if (list.bookIds.includes(book.bookId)) {
+      alert('This book is already in this list!');
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const updatedBookIds = [...list.bookIds, book.bookId];
+      await updateReadingList(list.id, { ...list, bookIds: updatedBookIds });
+      showSuccess(`Added to ${list.name}!`);
+      setIsListModalOpen(false);
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   if (isLoading) {
@@ -207,6 +249,39 @@ export function BookDetail() {
             </div>
           </div>
         </div>
+
+        {/* --- LİSTE SEÇİM MODALI --- */}
+        <Modal
+          isOpen={isListModalOpen}
+          onClose={() => setIsListModalOpen(false)}
+          title="Select a Reading List"
+        >
+          <div className="space-y-3">
+            {userLists.length === 0 ? (
+              <p className="text-center text-slate-500 py-4">No lists found. Please create one in Reading Lists page.</p>
+            ) : (
+              userLists.map((list) => (
+                <button
+                  key={list.id}
+                  onClick={() => handleSelectAndAddToList(list)}
+                  disabled={isUpdating}
+                  className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-violet-500 hover:bg-violet-50 transition-all group"
+                >
+                  <div className="text-left">
+                    <p className="font-bold text-slate-900 group-hover:text-violet-700">{list.name}</p>
+                    <p className="text-xs text-slate-500">{list.bookIds.length} books</p>
+                  </div>
+                  <svg className="w-5 h-5 text-slate-400 group-hover:text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              ))
+            )}
+            <Button variant="secondary" className="w-full mt-4" onClick={() => navigate('/reading-lists')}>
+              Go to Reading Lists
+            </Button>
+          </div>
+        </Modal>
 
         {/* TODO: Implement reviews section */}
         <div className="mt-8 glass-effect rounded-3xl shadow-xl border border-white/20 p-8 md:p-12">

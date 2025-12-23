@@ -1,5 +1,4 @@
 import { Book, ReadingList, Review } from '@/types';
-import { mockReadingLists } from './mockData';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 /**
@@ -44,7 +43,7 @@ import { fetchAuthSession } from 'aws-amplify/auth';
  * ============================================================================
  */
 
-// ✅ Artık API_BASE_URL aktif (env’den geliyor)
+// Artık API_BASE_URL aktif (env’den geliyor)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
 /**
@@ -64,19 +63,35 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
     const session = await fetchAuthSession();
-    // Token varsa al, yoksa boş string ata
-    const token = session.tokens?.idToken?.toString() || '';
-    
-    return {
-      'Authorization': `Bearer ${token}`,
+    const token = session.tokens?.idToken?.toString();
+
+    console.log("AWS'ye gönderilen (ID) Token:", token); 
+
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return headers;
   } catch (error) {
     console.error('Auth headers error:', error);
-    return {
-      'Content-Type': 'application/json',
-    };
+    return { 'Content-Type': 'application/json' };
   }
+}
+
+// ✅ Tek yerde güvenli unwrap (API Gateway proxy "body" dönebiliyor)
+async function unwrapJson<T>(response: Response): Promise<T> {
+  const result = await response.json();
+
+  const payload =
+    result?.body
+      ? (typeof result.body === 'string' ? JSON.parse(result.body) : result.body)
+      : result;
+
+  return payload as T;
 }
 
 /**
@@ -197,7 +212,7 @@ export async function createBook(book: Omit<Book, 'bookId'>): Promise<Book> {
  * ✅ Week 3: Now connected to AWS with PUT method and JWT Auth
  */
 export async function updateBook(id: string, book: Partial<Book>): Promise<Book> {
-  console.log("🔥 updateBook called", { id, book });
+  console.log("updateBook called", { id, book });
 
   const authHeaders = await getAuthHeaders();
 
@@ -269,12 +284,13 @@ export async function getRecommendations(favoriteGenres: string = 'Genel'): Prom
       throw new Error(`AI Önerisi alınamadı: ${response.status}`);
     }
 
-    const result = await response.json();
+    // API Gateway proxy "body" dönebileceği için unwrap ediyoruz
+    const data = await unwrapJson<{ recommendations?: string }>(response);
 
     // Lambda'dan dönen recommendations metnini string olarak döndürüyoruz
-    return typeof result.recommendations === 'string' 
-      ? result.recommendations 
-      : JSON.stringify(result.recommendations || result);
+    return typeof data.recommendations === 'string' 
+      ? data.recommendations 
+      : JSON.stringify(data.recommendations || data);
   } catch (error) {
     console.error("Bedrock API Hatası:", error);
     return "Şu an öneri oluşturulamıyor, lütfen daha sonra tekrar deneyin.";
@@ -287,11 +303,24 @@ export async function getRecommendations(favoriteGenres: string = 'Genel'): Prom
  * TODO: Replace with real API call in Week 2, Day 5-7
  */
 export async function getReadingLists(): Promise<ReadingList[]> {
-  // Şimdilik MOCK
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(mockReadingLists), 500);
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(`${API_BASE_URL}/reading-lists`, {
+    method: 'GET',
+    headers: authHeaders,
   });
+
+  if (!response.ok) {
+    throw new Error('Reading lists alınamadı');
+  }
+
+  const result = await response.json();
+
+  return typeof result.body === 'string'
+    ? JSON.parse(result.body)
+    : result.body ?? result;
 }
+
 
 /**
  * Create a new reading list
@@ -301,50 +330,73 @@ export async function getReadingLists(): Promise<ReadingList[]> {
 export async function createReadingList(
   list: Omit<ReadingList, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<ReadingList> {
-  // Şimdilik MOCK
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newList: ReadingList = {
-        ...list,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      resolve(newList);
-    }, 500);
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(`${API_BASE_URL}/reading-lists`, {
+    method: 'POST',
+    headers: authHeaders,
+    body: JSON.stringify(list),
   });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Reading list oluşturulamadı (${response.status}). ${text}`);
+  }
+
+  const result = await response.json();
+
+  const created =
+    typeof result.body === 'string' ? JSON.parse(result.body) : result.body || result;
+
+  return created as ReadingList;
 }
+
 
 export async function updateReadingList(
   id: string,
   list: Partial<ReadingList>
 ): Promise<ReadingList> {
-  // Şimdilik MOCK
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const existingList = mockReadingLists.find((l) => l.id === id);
-      const updatedList: ReadingList = {
-        ...existingList!,
-        ...list,
-        id,
-        updatedAt: new Date().toISOString(),
-      };
-      resolve(updatedList);
-    }, 500);
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(`${API_BASE_URL}/reading-lists/${id}`, {
+    method: 'PUT',
+    headers: authHeaders,
+    body: JSON.stringify(list),
   });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Reading list güncellenemedi (${response.status}). ${text}`);
+  }
+
+  const result = await response.json();
+
+  const updated =
+    typeof result.body === 'string' ? JSON.parse(result.body) : result.body || result;
+
+  return updated as ReadingList;
 }
+
 
 
 /**
  * Delete a reading list
  * TODO: Replace with DELETE /reading-lists/:id API call
  */
-export async function deleteReadingList(): Promise<void> {
-  // Şimdilik MOCK
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(), 300);
+export async function deleteReadingList(id: string): Promise<void> {
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(`${API_BASE_URL}/reading-lists/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders,
   });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Reading list silinemedi (${response.status}). ${text}`);
+  }
 }
+
 
 /**
  * Get reviews for a book
@@ -386,3 +438,4 @@ export async function createReview(review: Omit<Review, 'id' | 'createdAt'>): Pr
     }, 500);
   });
 }
+

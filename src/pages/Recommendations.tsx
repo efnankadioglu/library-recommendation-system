@@ -13,6 +13,13 @@ export function Recommendations() {
   const [aiResponse, setAiResponse] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Login yokken gösterilecek mesaj
+  const loginRequiredMessage =
+    "Hello, Book Lover 📖\n\n" +
+    "Our AI librarian is excited to craft personalized recommendations just for you! " +
+    "But first, we need to get acquainted. " +
+    "Login now, and let's discover your next amazing read together!";
+
   const exampleQueries = [
     'I love mystery novels with strong female protagonists',
     'Looking for science fiction books about space exploration',
@@ -30,10 +37,33 @@ export function Recommendations() {
     setAiResponse('');
 
     try {
-      // API'ye gerçek kullanıcı sorgusunu gönderiyoruz
       const responseText = await getRecommendations(query);
+
+      // Backend login yokken 200 + klasik mesaj döndürüyorsa
+      if (
+        responseText?.includes('Şu an öneri oluşturulamıyor') ||
+        responseText?.includes('lütfen daha sonra tekrar deneyin')
+      ) {
+        setAiResponse(loginRequiredMessage);
+        return;
+      }
+
       setAiResponse(responseText);
-    } catch (error) {
+    } catch (error: unknown) {
+      // Backend 401 / unauthorized durumları
+      if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+
+        if (
+          message.includes('401') ||
+          message.includes('unauthorized') ||
+          message.includes('forbidden')
+        ) {
+          setAiResponse(loginRequiredMessage);
+          return;
+        }
+      }
+
       handleApiError(error);
     } finally {
       setIsLoading(false);
@@ -87,7 +117,13 @@ export function Recommendations() {
           </div>
 
           <div className="mt-8">
-            <Button variant="primary" size="lg" onClick={handleGetRecommendations} disabled={isLoading} className="w-full">
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleGetRecommendations}
+              disabled={isLoading}
+              className="w-full"
+            >
               {isLoading ? 'Thinking...' : 'Get AI Recommendations'}
             </Button>
           </div>
@@ -96,7 +132,9 @@ export function Recommendations() {
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-12">
             <LoadingSpinner size="lg" />
-            <p className="mt-4 text-slate-600 animate-pulse font-medium">Consulting with Amazon Bedrock...</p>
+            <p className="mt-4 text-slate-600 animate-pulse font-medium">
+              Consulting with Amazon Bedrock...
+            </p>
           </div>
         )}
 
@@ -113,15 +151,30 @@ export function Recommendations() {
                   <span className="text-2xl">🤖</span>
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-indigo-600 uppercase tracking-widest">AI Assistant</p>
-                  <p className="text-xs text-slate-400">Powered by Claude 3 Haiku</p>
+                  <p className="text-sm font-bold text-indigo-600 uppercase tracking-widest">
+                    AI Assistant
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    Powered by Claude 3 Haiku
+                  </p>
                 </div>
               </div>
-              
-              {/* whitespace-pre-wrap: Bedrock'tan gelen satır boşluklarını korur */}
+
               <div className="text-slate-700 text-lg leading-relaxed whitespace-pre-wrap bg-white/40 p-6 rounded-2xl border border-white/60">
                 {aiResponse}
               </div>
+
+              {aiResponse === loginRequiredMessage && (
+                <div className="mt-6 text-center">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={() => (window.location.href = '/login')}
+                  >
+                    Login
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}

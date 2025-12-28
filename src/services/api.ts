@@ -13,9 +13,6 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
     const session = await fetchAuthSession();
     const token = session.tokens?.idToken?.toString();
-
-    console.log("AWS'ye gönderilen (ID) Token:", token);
-
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -56,7 +53,12 @@ export async function getBooks(): Promise<Book[]> {
 
 /* Get a single book by ID */
 export async function getBook(id: string): Promise<Book | null> {
-  const response = await fetch(`${API_BASE_URL}/books/${id}`);
+  const authHeaders = await getAuthHeaders(); // Token'ı alıyoruz
+
+  const response = await fetch(`${API_BASE_URL}/books/${id}`, {
+    method: 'GET',
+    headers: authHeaders
+  });
 
   if (response.status === 404) return null;
   if (!response.ok) throw new Error('Failed to fetch book');

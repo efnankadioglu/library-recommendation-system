@@ -54,62 +54,58 @@ Use this checklist to track your progress through the 4-week project.
 
 ### DynamoDB Setup
 
-- [ ] Create DynamoDB table: `Books`
+- [X] Create DynamoDB table: `Books`
   - Partition key: `id` (String)
   - On-demand pricing
-- [ ] Create DynamoDB table: `ReadingLists`
+- [X] Create DynamoDB table: `ReadingLists`
   - Partition key: `userId` (String)
   - Sort key: `id` (String)
   - On-demand pricing
-- [ ] Create Global Secondary Index on ReadingLists: `id-index`
-- [ ] Copy books from `src/services/mockData.ts`
-- [ ] Convert to DynamoDB JSON format
-- [ ] Load books into DynamoDB using AWS CLI
-- [ ] Verify data in DynamoDB Console
+- [X] **Create Global Secondary Index on ReadingLists**: `id-index`
+- [X] Copy books from `src/services/mockData.ts`
+- [X] Convert to DynamoDB JSON format
+- [X] Load books into DynamoDB using AWS CLI
+- [X] Verify data in DynamoDB Console
 
 ### Books API Lambda Functions
 
-- [ ] Create Lambda: `library-get-books`
-- [ ] Add DynamoDB read permissions to Lambda role
-- [ ] Deploy get-books code (see IMPLEMENTATION_GUIDE.md)
-- [ ] Test Lambda in AWS Console
-- [ ] Create API Gateway resource: `/books`
-- [ ] Create GET method, integrate with Lambda
-- [ ] Enable CORS
-- [ ] Deploy API
-- [ ] Test: `curl https://YOUR-API-ID.execute-api.us-east-1.amazonaws.com/dev/books`
-- [ ] See array of books from DynamoDB
-
-- [ ] Create Lambda: `library-get-book`
-- [ ] Deploy get-book code
-- [ ] Create API Gateway resource: `/books/{id}`
-- [ ] Create GET method, integrate with Lambda
-- [ ] Enable CORS
-- [ ] Deploy API
-- [ ] Test: `curl https://YOUR-API-ID.execute-api.us-east-1.amazonaws.com/dev/books/1`
-- [ ] See single book details
+- [X] Create Lambda: `library-get-books`
+- [X] Add DynamoDB read permissions to Lambda role
+- [X] Deploy get-books code (see IMPLEMENTATION_GUIDE.md)
+- [X] Test Lambda in AWS Console
+- [X] Create API Gateway resource: `/books`
+- [X] Create GET method, integrate with Lambda
+- [X] Enable CORS
+- [X] Deploy API
+- [X] Test: `curl https://YOUR-API-ID.execute-api.us-east-1.amazonaws.com/dev/books`
+- [X] See array of books from DynamoDB
+- [X] Create Lambda: `library-get-book`
+- [X] Deploy get-book code
+- [X] Create API Gateway resource: `/books/{id}`
+- [X] Create GET method, integrate with Lambda
+- [X] Enable CORS
+- [X] Deploy API
+- [X] Test: `curl https://YOUR-API-ID.execute-api.us-east-1.amazonaws.com/dev/books/1`
+- [X] See single book details
 
 ### Reading Lists API Lambda Functions
 
-- [ ] Create Lambda: `library-get-reading-lists`
-- [ ] Deploy code with DynamoDB Query by userId
+- [X] Create Lambda: `library-get-reading-lists`
+- [X] Deploy code with DynamoDB Query by userId
 - [ ] Create API Gateway resource: `/reading-lists`
 - [ ] Create GET method
 - [ ] Enable CORS
 - [ ] Deploy API
-
 - [ ] Create Lambda: `library-create-reading-list`
 - [ ] Deploy code with DynamoDB PutItem
 - [ ] Create POST method on `/reading-lists`
 - [ ] Enable CORS
 - [ ] Deploy API
-
 - [ ] Create Lambda: `library-update-reading-list`
 - [ ] Deploy code with DynamoDB UpdateItem
 - [ ] Create PUT method on `/reading-lists/{id}`
 - [ ] Enable CORS
 - [ ] Deploy API
-
 - [ ] Create Lambda: `library-delete-reading-list`
 - [ ] Deploy code with DynamoDB DeleteItem
 - [ ] Create DELETE method on `/reading-lists/{id}`
@@ -182,7 +178,6 @@ Use this checklist to track your progress through the 4-week project.
 - [ ] Add authorizer to DELETE /reading-lists/{id}
 - [ ] Add authorizer to POST /recommendations
 - [ ] Deploy API to `dev` stage
-
 - [ ] Update `src/services/api.ts`
 - [ ] Implement `getAuthHeaders()` function (see IMPLEMENTATION_GUIDE.md)
 - [ ] Update `createReadingList()` to use auth headers
@@ -200,72 +195,71 @@ Use this checklist to track your progress through the 4-week project.
 
 ### AI Recommendations
 
-- [ ] Go to AWS Bedrock Console
-- [ ] Click "Model access"
-- [ ] Request access to Claude 3 Haiku
-- [ ] Wait for approval (usually instant)
-- [ ] Create Lambda: `library-get-recommendations`
-- [ ] Set timeout to 30 seconds
-- [ ] Add Bedrock permissions to Lambda role
-- [ ] Deploy recommendations code (see IMPLEMENTATION_GUIDE.md)
-- [ ] Test Lambda with sample query
-- [ ] Create API Gateway resource: `/recommendations`
-- [ ] Create POST method
-- [ ] Add Cognito authorizer
-- [ ] Enable CORS
-- [ ] Deploy API
-
-- [ ] Update `src/services/api.ts`
-- [ ] Update `getRecommendations()` function signature to accept query
-- [ ] Replace mock code with real API call
-- [ ] Update `src/pages/Recommendations.tsx` to pass query to API
-- [ ] Test recommendations page
-- [ ] Try different queries
-- [ ] Verify AI responses are relevant
+- [X] Go to AWS Bedrock Console
+- [X] Click "Model access"
+- [X] Request access to Claude 3 Haiku
+- [X] Wait for approval (usually instant)
+- [X] Create Lambda: `library-get-recommendations`
+- [X] Set timeout to 30 seconds
+- [X] Add Bedrock permissions to Lambda role
+- [X] Deploy recommendations code (see IMPLEMENTATION_GUIDE.md)
+- [X] Test Lambda with sample query
+- [X] Create API Gateway resource: `/recommendations`
+- [X] Create POST method
+- [X] Add Cognito authorizer
+- [X] Enable CORS
+- [X] Deploy API
+- [X] Update `src/services/api.ts`
+- [X] Update `getRecommendations()` function signature to accept query
+- [X] Replace mock code with real API call
+- [X] Update `src/pages/Recommendations.tsx` to pass query to API
+- [X] Test recommendations page
+- [X] Try different queries
+- [X] Verify AI responses are relevant
 
 ### Frontend Deployment with CI/CD
 
 **Step 1: Create S3 Bucket and CloudFront**
 
-- [ ] Go to S3 Console
-- [ ] Create bucket: `library-app-frontend-[your-name]`
-- [ ] Uncheck "Block all public access"
-- [ ] Enable static website hosting
+- [X] Go to S3 Console
+- [X] Create bucket: `library-app-frontend-[your-name]`
+- [X] Uncheck "Block all public access"
+- [X] Enable static website hosting
   - Index document: `index.html`
   - Error document: `index.html`
-- [ ] Add bucket policy for public read access
-- [ ] Go to CloudFront Console
-- [ ] Create distribution
+- [X] Add bucket policy for public read access
+- [X] Go to CloudFront Console
+- [X] Create distribution
   - Origin: Your S3 bucket
   - Redirect HTTP to HTTPS
   - Default root object: `index.html`
-- [ ] Wait for CloudFront deployment (10-15 minutes)
-- [ ] Update CORS in API Gateway to allow CloudFront URL
+- [X] Wait for CloudFront deployment (10-15 minutes)
+- [X] Update CORS in API Gateway to allow CloudFront URL
 
 **Step 2: Set Up CI/CD Pipeline with CodePipeline**
 
-- [ ] Go to CodePipeline Console
-- [ ] Create new pipeline: `library-frontend-pipeline`
-- [ ] Configure source stage:
+- [X] Go to CodePipeline Console
+- [X] Create new pipeline: `library-frontend-pipeline`
+- [X] Configure source stage:
   - Source provider: GitHub (Version 2)
   - Connect to GitHub account
   - Select your repository: `library-recommendation-system`
   - Branch: `main`
   - Change detection: GitHub webhooks
-- [ ] Configure build stage:
+- [X] Configure build stage:
   - Build provider: AWS CodeBuild
   - Create new build project: `library-frontend-build`
   - Environment: Managed image, Ubuntu, Standard runtime, Latest image
   - Service role: Create new service role
-- [ ] Configure deploy stage:
+- [X] Configure deploy stage:
   - Deploy provider: Amazon S3
   - Bucket: Your S3 bucket name
   - Extract files before deploy: Yes
-- [ ] Review and create pipeline
+- [X] Review and create pipeline
 
 **Step 3: Create buildspec.yml**
 
-- [ ] Create `buildspec.yml` in project root with:
+- [X] Create `buildspec.yml` in project root with:
 
 ```yaml
 version: 0.2
@@ -284,35 +278,35 @@ artifacts:
   base-directory: dist
 ```
 
-- [ ] Commit and push buildspec.yml to GitHub
-- [ ] Watch pipeline execute automatically
-- [ ] Verify build succeeds
-- [ ] Verify deployment to S3
-- [ ] Test CloudFront URL - app should load
+- [X] Commit and push buildspec.yml to GitHub
+- [X] Watch pipeline execute automatically
+- [X] Verify build succeeds
+- [X] Verify deployment to S3
+- [X] Test CloudFront URL - app should load
 
 **Step 4: Test CI/CD**
 
-- [ ] Make a small change to frontend (e.g., update homepage text)
-- [ ] Commit and push to GitHub
-- [ ] Watch CodePipeline automatically trigger
-- [ ] Verify changes appear on CloudFront URL
-- [ ] CI/CD is working! 🎉
+- [X] Make a small change to frontend (e.g., update homepage text)
+- [X] Commit and push to GitHub
+- [X] Watch CodePipeline automatically trigger
+- [X] Verify changes appear on CloudFront URL
+- [X] CI/CD is working! 🎉
 
 ### Testing & Polish
 
-- [ ] Test user registration flow
-- [ ] Test login/logout
-- [ ] Test browsing books
-- [ ] Test book detail pages
-- [ ] Test creating reading lists
-- [ ] Test adding books to lists
-- [ ] Test deleting reading lists
-- [ ] Test AI recommendations with various queries
-- [ ] Test on mobile device
-- [ ] Test on different browsers
-- [ ] Fix any bugs found
-- [ ] Run `npm test` - verify tests pass
-- [ ] Run `npm run lint` - fix any errors
+- [X] Test user registration flow
+- [X] Test login/logout
+- [X] Test browsing books
+- [X] Test book detail pages
+- [X] Test creating reading lists
+- [X] Test adding books to lists
+- [X] Test deleting reading lists
+- [X] Test AI recommendations with various queries
+- [X] Test on mobile device
+- [X] Test on different browsers
+- [X] Fix any bugs found
+- [X] Run `npm test` - verify tests pass
+- [X] Run `npm run lint` - fix any errors
 - [ ] Check test coverage: `npm run test:coverage`
 - [ ] Verify >70% coverage
 
@@ -365,7 +359,7 @@ artifacts:
 - [ ] All API endpoints working
 - [ ] User authentication functional
 - [ ] AI recommendations working
-- [ ] > 70% test coverage
+- [ ]
 - [ ] No critical security vulnerabilities
 - [ ] Code follows TypeScript strict mode (no `any` types)
 - [ ] All commits have clear messages
@@ -400,15 +394,15 @@ artifacts:
 
 ## Tips for Success
 
-✅ **Start early** - Don't wait until the last day  
-✅ **Test frequently** - Test each Lambda as you create it  
-✅ **Commit often** - Small commits with clear messages  
-✅ **Read errors carefully** - Error messages usually tell you what's wrong  
-✅ **Use CloudWatch Logs** - Essential for debugging Lambda functions  
-✅ **Ask for help** - No question is too simple  
-✅ **Work together** - Pair program on complex features  
-✅ **Stay organized** - Keep track of your AWS resources  
-✅ **Monitor costs** - Check AWS billing dashboard regularly  
+✅ **Start early** - Don't wait until the last day
+✅ **Test frequently** - Test each Lambda as you create it
+✅ **Commit often** - Small commits with clear messages
+✅ **Read errors carefully** - Error messages usually tell you what's wrong
+✅ **Use CloudWatch Logs** - Essential for debugging Lambda functions
+✅ **Ask for help** - No question is too simple
+✅ **Work together** - Pair program on complex features
+✅ **Stay organized** - Keep track of your AWS resources
+✅ **Monitor costs** - Check AWS billing dashboard regularly
 ✅ **Have fun!** - You're building something awesome!
 
 ---

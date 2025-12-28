@@ -15,10 +15,10 @@ This guide will help you implement the AWS serverless backend for the Library Re
 
 ## 📋 Table of Contents
 
-1. [Week 1: AWS Setup & First Lambda](#week-1-aws-setup--first-lambda)
-2. [Week 2: DynamoDB & Books API](#week-2-dynamodb--books-api)
+1. [Week 1: AWS Setup &amp; First Lambda](#week-1-aws-setup--first-lambda)
+2. [Week 2: DynamoDB &amp; Books API](#week-2-dynamodb--books-api)
 3. [Week 3: Authentication with Cognito](#week-3-authentication-with-cognito)
-4. [Week 4: AI Recommendations & Deployment](#week-4-ai-recommendations--deployment)
+4. [Week 4: AI Recommendations &amp; Deployment](#week-4-ai-recommendations--deployment)
 
 ---
 
@@ -77,11 +77,11 @@ aws configure
 1. **Go to AWS Lambda Console**
 2. **Click "Create function"**
 3. **Configure**:
+
    - Function name: `hello-world-test`
    - Runtime: Node.js 20.x
    - Architecture: arm64 (cheaper)
    - Execution role: Create new role
-
 4. **Replace the code**:
 
 ```javascript
@@ -114,34 +114,34 @@ export const handler = async (event) => {
 
 1. **Go to API Gateway Console**
 2. **Create REST API**:
+
    - Choose "REST API" (not private)
    - API name: `library-api-test`
    - Endpoint type: Regional
-
 3. **Create Resource**:
+
    - Click "Actions" > "Create Resource"
    - Resource name: `hello`
    - Resource path: `/hello`
-
 4. **Create Method**:
+
    - Select `/hello` resource
    - Click "Actions" > "Create Method"
    - Choose `GET`
    - Integration type: Lambda Function
    - Select your `hello-world-test` function
    - Save and grant permissions
-
 5. **Enable CORS**:
+
    - Select `/hello` resource
    - Click "Actions" > "Enable CORS"
    - Use default settings
    - Click "Enable CORS and replace existing CORS headers"
-
 6. **Deploy API**:
+
    - Click "Actions" > "Deploy API"
    - Deployment stage: `dev`
    - Note your Invoke URL (e.g., `https://abc123.execute-api.us-east-1.amazonaws.com/dev`)
-
 7. **Test with curl**:
 
 ```bash
@@ -162,13 +162,13 @@ curl https://YOUR-API-ID.execute-api.us-east-1.amazonaws.com/dev/hello
 Set up your GitHub repository now so you can commit progress throughout the project.
 
 1. **Create repository on GitHub**:
+
    - Go to https://github.com/new
    - Repository name: `library-recommendation-system`
    - Description: "AI-powered library book recommendation system (CENG413 Project)"
    - Choose **Public** (for portfolio)
    - Don't initialize with README (you already have one)
    - Click "Create repository"
-
 2. **Initialize Git locally**:
 
 ```bash
@@ -187,9 +187,9 @@ git push -u origin main
 ```
 
 4. **Add repository metadata**:
+
    - Add topics: `aws`, `react`, `typescript`, `serverless`, `bedrock`, `student-project`
    - Update description if needed
-
 5. **Commit regularly**:
 
 ```bash
@@ -220,11 +220,11 @@ git push
 1. **Go to DynamoDB Console**
 2. **Click "Create table"**
 3. **Configure Books Table**:
+
    - Table name: `Books`
    - Partition key: `id` (String)
    - Table settings: Use default settings (On-demand)
    - Click "Create table"
-
 4. **Load Sample Data**:
 
 Create a file `books-data.json`:
@@ -262,12 +262,13 @@ aws dynamodb batch-write-item --request-items file://books-data.json
 #### Create ReadingLists Table
 
 1. **Create table**:
+
    - Table name: `ReadingLists`
    - Partition key: `userId` (String)
    - Sort key: `id` (String)
    - Click "Create table"
-
 2. **Create Global Secondary Index**:
+
    - Go to table > Indexes tab
    - Click "Create index"
    - Partition key: `id` (String)
@@ -279,15 +280,15 @@ aws dynamodb batch-write-item --request-items file://books-data.json
 #### Lambda Function: get-books
 
 1. **Create Lambda function**:
+
    - Name: `library-get-books`
    - Runtime: Node.js 20.x
    - Create new execution role
-
 2. **Add DynamoDB permissions to role**:
+
    - Go to IAM > Roles
    - Find your Lambda execution role
    - Attach policy: `AmazonDynamoDBReadOnlyAccess`
-
 3. **Function code**:
 
 ```javascript
@@ -328,14 +329,13 @@ export const handler = async (event) => {
 ```
 
 4. **Deploy and test**
-
 5. **Add to API Gateway**:
+
    - Create resource: `/books`
    - Create method: `GET`
    - Integrate with `library-get-books` Lambda
    - Enable CORS
    - Deploy to `dev` stage
-
 6. **Test**:
 
 ```bash
@@ -399,12 +399,12 @@ export const handler = async (event) => {
 ```
 
 3. **Add to API Gateway**:
+
    - Create resource: `/books/{id}`
    - Create method: `GET`
    - Integrate with `library-get-book` Lambda
    - Enable CORS
    - Deploy
-
 4. **Test**:
 
 ```bash
@@ -435,32 +435,32 @@ Follow the same pattern to create:
 1. **Go to Cognito Console**
 2. **Click "Create user pool"**
 3. **Configure sign-in**:
+
    - Sign-in options: Email
    - Click "Next"
-
 4. **Configure security**:
+
    - Password policy: Cognito defaults
    - MFA: No MFA (for simplicity)
    - Click "Next"
-
 5. **Configure sign-up**:
+
    - Self-registration: Enabled
    - Required attributes: name, email
    - Click "Next"
-
 6. **Configure message delivery**:
+
    - Email provider: Send email with Cognito
    - Click "Next"
-
 7. **Integrate your app**:
+
    - User pool name: `library-users`
    - App client name: `library-web-client`
    - Client secret: Don't generate
    - Click "Next"
-
 8. **Review and create**
-
 9. **Note these values**:
+
    - User Pool ID (e.g., `us-east-1_abc123`)
    - App Client ID (e.g., `1a2b3c4d5e6f7g8h9i0j`)
 
@@ -584,11 +584,11 @@ const logout = async () => {
 #### Protect API Endpoints
 
 1. **For each method** (except GET /books):
+
    - Click on the method
    - Click "Method Request"
    - Authorization: Select `CognitoAuthorizer`
    - Click save
-
 2. **Deploy API** to `dev` stage
 
 #### Update Frontend API Calls
@@ -667,8 +667,8 @@ export async function createReadingList(
 1. **Create Lambda**: `library-get-recommendations`
 2. **Increase timeout**: Configuration > General > Timeout: 30 seconds
 3. **Add Bedrock permissions**:
-   - Attach policy: `AmazonBedrockFullAccess`
 
+   - Attach policy: `AmazonBedrockFullAccess`
 4. **Function code**:
 
 ```javascript
@@ -748,11 +748,11 @@ Respond in JSON format:
 ```
 
 5. **Add to API Gateway**:
+
    - Create resource: `/recommendations`
    - Create method: `POST`
    - Add Cognito authorizer
    - Deploy
-
 6. **Update frontend** `src/services/api.ts`:
 
 ```typescript
@@ -775,13 +775,14 @@ export async function getRecommendations(query: string): Promise<Recommendation[
 
 1. **Go to S3 Console**
 2. **Create bucket**:
+
    - Name: `library-app-frontend-[your-name]` (must be globally unique)
    - Region: us-east-1
    - Uncheck "Block all public access"
    - Acknowledge warning
    - Click "Create bucket"
-
 3. **Enable static website hosting**:
+
    - Go to bucket > Properties
    - Scroll to "Static website hosting"
    - Click "Edit"
@@ -789,8 +790,8 @@ export async function getRecommendations(query: string): Promise<Recommendation[
    - Index document: `index.html`
    - Error document: `index.html`
    - Save
-
 4. **Add bucket policy**:
+
    - Go to Permissions tab
    - Bucket Policy > Edit
    - Add:
@@ -814,17 +815,16 @@ export async function getRecommendations(query: string): Promise<Recommendation[
 
 1. **Go to CloudFront Console**
 2. **Create distribution**:
+
    - Origin domain: Select your S3 bucket
    - Origin access: Public
    - Viewer protocol policy: Redirect HTTP to HTTPS
    - Default root object: `index.html`
    - Click "Create distribution"
-
 3. **Wait for deployment** (10-15 minutes)
-
 4. **Note your CloudFront URL**: `https://d123abc.cloudfront.net`
-
 5. **Update CORS in API Gateway**:
+
    - Add CloudFront URL to allowed origins
 
 #### Step 3: Set Up CI/CD with CodePipeline
@@ -862,13 +862,13 @@ git push
 ```
 
 3. **Go to CodePipeline Console**
-
 4. **Create pipeline**:
+
    - Pipeline name: `library-frontend-pipeline`
    - Service role: New service role
    - Click "Next"
-
 5. **Add source stage**:
+
    - Source provider: **GitHub (Version 2)**
    - Click "Connect to GitHub"
    - Connection name: `github-connection`
@@ -879,8 +879,8 @@ git push
    - Change detection options: **Start the pipeline on source code change** (webhooks)
    - Output artifact format: CodePipeline default
    - Click "Next"
-
 6. **Add build stage**:
+
    - Build provider: **AWS CodeBuild**
    - Click "Create project"
    - Project name: `library-frontend-build`
@@ -894,25 +894,25 @@ git push
    - Buildspec: **Use a buildspec file** (buildspec.yml)
    - Click "Continue to CodePipeline"
    - Click "Next"
-
 7. **Add deploy stage**:
+
    - Deploy provider: **Amazon S3**
    - Region: us-east-1
    - Bucket: Select your S3 bucket
    - **Check "Extract file before deploy"** (important!)
    - Click "Next"
-
 8. **Review and create**:
+
    - Review all settings
    - Click "Create pipeline"
-
 9. **Watch the pipeline execute**:
+
    - Source stage: Pulls code from GitHub
    - Build stage: Runs npm install and npm run build
    - Deploy stage: Uploads dist/ contents to S3
    - Should complete in 3-5 minutes
-
 10. **Test the deployment**:
+
     - Visit your CloudFront URL
     - App should load successfully
 
@@ -934,12 +934,13 @@ git push
 ```
 
 3. **Watch CodePipeline**:
+
    - Go to CodePipeline Console
    - Your pipeline should automatically start
    - Watch it progress through Source → Build → Deploy
    - Takes 3-5 minutes
-
 4. **Verify changes**:
+
    - Wait for pipeline to complete
    - Visit CloudFront URL
    - Your changes should be live!
@@ -950,32 +951,33 @@ git push
 
 #### End-to-End Testing Checklist
 
-- [ ] User can register and verify email
-- [ ] User can login and logout
-- [ ] Books page displays all books from DynamoDB
-- [ ] Book detail page works
-- [ ] User can create reading lists
-- [ ] User can add books to reading lists
-- [ ] User can delete reading lists
-- [ ] AI recommendations work
+- [X] User can register and verify email
+- [X] User can login and logout
+- [X] Books page displays all books from DynamoDB
+- [X] Book detail page works
+- [X] User can create reading lists
+- [X] User can add books to reading lists
+- [X] User can delete reading lists
+- [X] AI recommendations work
 - [ ] Admin can add new books (if implemented)
-- [ ] All API calls include authentication
-- [ ] Error messages display properly
-- [ ] Loading states work
-- [ ] Mobile responsive design works
+- [X] All API calls include authentication
+- [X] Error messages display properly
+- [X] Loading states work
+- [X] Mobile responsive design works
 
 #### Performance Optimization
 
 1. **Add caching to API Gateway**:
+
    - Go to API Gateway > Stages > dev
    - Enable caching for GET /books (TTL: 300 seconds)
-
 2. **Optimize Lambda cold starts**:
+
    - Use arm64 architecture
    - Minimize dependencies
    - Keep functions small
-
 3. **Add CloudWatch monitoring**:
+
    - Set up alarms for Lambda errors
    - Monitor API Gateway 4xx/5xx errors
 
@@ -1031,13 +1033,13 @@ git commit -m "Initial commit: Library Recommendation System"
 ```
 
 3. **Create GitHub repository**:
+
    - Go to https://github.com/new
    - Repository name: `library-recommendation-system`
    - Description: "AI-powered library book recommendation system built with React, AWS Lambda, DynamoDB, and Bedrock (Claude 3 Haiku)"
    - Choose **Public** (for portfolio)
    - Don't initialize with README
    - Click "Create repository"
-
 4. **Push to GitHub**:
 
 ```bash
@@ -1047,10 +1049,10 @@ git push -u origin main
 ```
 
 5. **Update Repository**:
+
    - Add topics: `aws`, `react`, `typescript`, `serverless`, `bedrock`, `dynamodb`, `lambda`, `cognito`
    - Add website URL (your CloudFront URL)
    - Add LICENSE file (MIT or Apache 2.0)
-
 6. **Add GitHub badges to README** (optional):
 
 ```markdown
@@ -1071,14 +1073,15 @@ git push -u origin main
 #### Prepare Demo
 
 1. **Demo script**:
+
    - Show homepage
    - Register new user
    - Browse books
    - Create reading list
    - Get AI recommendations
    - Show admin features
-
 2. **Talking points**:
+
    - Serverless architecture benefits
    - Cost optimization (Free Tier usage)
    - Security (Cognito, IAM)

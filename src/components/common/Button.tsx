@@ -26,7 +26,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseClasses =
-    'rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-4';
+    'bg-primary-600';
 
   const variantClasses = {
     primary:

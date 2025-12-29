@@ -158,7 +158,7 @@ export function ReadingLists() {
                   
                   <div className="mb-4">
                     <select 
-                      className="w-full p-2.5 border border-violet-100 rounded-xl text-sm bg-violet-50/30 text-violet-800 focus:ring-2 focus:ring-violet-400 outline-none transition-all cursor-pointer font-medium"
+                      className="w-full p-2.5 border border-violet-100 rounded-xl text-sm bg-violet-50/30 text-violet-800 focus:ring-2 focus:ring-violet-400 focus:ring-offset-0 ring-inset outline-none transition-all cursor-pointer font-medium appearance-none"
                       onChange={(e) => e.target.value && handleAddBookToList(list, e.target.value)}
                       value=""
                     >

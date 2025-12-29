@@ -32,7 +32,7 @@ export function Card({
     : 'bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 p-6';
 
   const hoverClasses = hoverable
-    ? 'hover:shadow-lg'
+    ? 'hover:shadow-2xl hover:-translate-y-1 hover:border-violet-300 transition-all duration-300 cursor-pointer hover-glow'
     : 'transition-all duration-300';
 
   const classes = `${baseClasses} ${hoverClasses} ${className}`;

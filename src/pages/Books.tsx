@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { BookSearch } from '@/components/books/BookSearch';
 import { BookGrid } from '@/components/books/BookGrid';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -8,6 +9,22 @@ import { handleApiError } from '@/utils/errorHandling';
 
 type MaybeNumber = number | string | undefined | null;
 
+type BookApiShape = Partial<Book> & {
+  id?: string;
+  bookId?: string;
+  rating?: MaybeNumber;
+  averageRating?: MaybeNumber;
+  year?: MaybeNumber;
+  publishedYear?: MaybeNumber;
+  publicationYear?: MaybeNumber;
+  published_date?: MaybeNumber;
+};
+
+const toNumber = (v: MaybeNumber): number => {
+  const n = typeof v === 'string' ? Number(v) : typeof v === 'number' ? v : 0;
+  return Number.isFinite(n) ? n : 0;
+};
+
 export function Books() {
   const [books, setBooks] = useState<Book[]>([]);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
@@ -15,13 +32,24 @@ export function Books() {
   const [sortBy, setSortBy] = useState('title');
 
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedGenre, setSelectedGenre] = useState<string>(''); 
-  const [selectedRating, setSelectedRating] = useState<string>(''); 
+  const [selectedGenre, setSelectedGenre] = useState<string>('');
+  const [selectedRating, setSelectedRating] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<string>('');
 
+  const location = useLocation();
+  const didFetch = useRef(false);
+
   useEffect(() => {
+    if (didFetch.current) return;
+    didFetch.current = true;
+
     loadBooks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.key]);
 
   useEffect(() => {
     applyAllFilters();
@@ -30,6 +58,7 @@ export function Books() {
 
   const loadBooks = async () => {
     setIsLoading(true);
+
     try {
       const data = await getBooks();
       setBooks(data);
@@ -42,11 +71,7 @@ export function Books() {
   };
 
   const norm = (v: string) =>
-    v
-      .toLowerCase()
-      .trim()
-      .replace(/[-_]+/g, ' ')
-      .replace(/\s+/g, ' ');
+    v.toLowerCase().trim().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ');
 
   const normalizeGenreValue = (v: string) => {
     const x = norm(v);
@@ -56,48 +81,28 @@ export function Books() {
   };
 
   const getBookRating = (book: Book): number => {
-    const candidate =
-      (book as unknown as { rating?: MaybeNumber; averageRating?: MaybeNumber }).rating ??
-      (book as unknown as { averageRating?: MaybeNumber }).averageRating;
-
-    const n = typeof candidate === 'string' ? Number(candidate) : typeof candidate === 'number' ? candidate : 0;
-    return Number.isFinite(n) ? n : 0;
+    const raw = book as BookApiShape;
+    const candidate = raw.rating ?? raw.averageRating;
+    return toNumber(candidate);
   };
 
   const getBookYear = (book: Book): number => {
-    const obj = book as unknown as {
-      year?: MaybeNumber;
-      publishedYear?: MaybeNumber;
-      publicationYear?: MaybeNumber;
-      published_date?: MaybeNumber;
-    };
-
+    const obj = book as BookApiShape;
     const pick = obj.year ?? obj.publishedYear ?? obj.publicationYear ?? obj.published_date;
-    const n = typeof pick === 'string' ? Number(pick) : typeof pick === 'number' ? pick : 0;
-    return Number.isFinite(n) ? n : 0;
+    return toNumber(pick);
   };
 
-  // dropdown seçeneklerini kitap listesinden dinamik üret
   const genreOptions = Array.from(
-    new Set(
-      books
-        .map((b) => (b.genre ?? '').trim())
-        .filter((g) => g.length > 0)
-    )
+    new Set(books.map((b) => (b.genre ?? '').trim()).filter((g) => g.length > 0))
   ).sort((a, b) => a.localeCompare(b));
 
   const yearOptions = Array.from(
-    new Set(
-      books
-        .map((b) => getBookYear(b))
-        .filter((y) => y > 0)
-    )
-  ).sort((a, b) => b - a); 
+    new Set(books.map((b) => getBookYear(b)).filter((y) => y > 0))
+  ).sort((a, b) => b - a);
 
   const applyAllFilters = () => {
     let result = [...books];
 
-    // 1) SEARCH
     const q = searchQuery.trim().toLowerCase();
     if (q) {
       result = result.filter((book) => {
@@ -108,25 +113,19 @@ export function Books() {
       });
     }
 
-    // 2) GENRE
     if (selectedGenre) {
       const wanted = normalizeGenreValue(selectedGenre);
       result = result.filter((book) => normalizeGenreValue(book.genre ?? '') === wanted);
     }
 
-    // 3) RATING
     if (selectedRating) {
-      const min = Number(selectedRating);
-      result = result.filter((book) => getBookRating(book) >= min);
+      result = result.filter((book) => getBookRating(book) >= Number(selectedRating));
     }
 
-    // 4) YEAR
     if (selectedYear) {
-      const y = Number(selectedYear);
-      result = result.filter((book) => getBookYear(book) === y);
+      result = result.filter((book) => getBookYear(book) === Number(selectedYear));
     }
 
-    // 5) SORT
     result.sort((a, b) => {
       if (sortBy === 'title') return (a.title ?? '').localeCompare(b.title ?? '');
       if (sortBy === 'author') return (a.author ?? '').localeCompare(b.author ?? '');
@@ -153,7 +152,6 @@ export function Books() {
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="container mx-auto">
-        {/* Header */}
         <div className="mb-12 text-center">
           <h1 className="text-5xl md:text-6xl font-extrabold mb-4">
             <span className="gradient-text">Book Catalog</span>
@@ -164,7 +162,6 @@ export function Books() {
           </p>
         </div>
 
-        {/* Search + Filters */}
         <div className="mb-8">
           <BookSearch
             genreOptions={genreOptions}
@@ -178,7 +175,7 @@ export function Books() {
           />
         </div>
 
-        {/* Filters & Sort */}
+        {/* Senin Orijinal Tasarımın: Filters & Sort */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="glass-effect px-4 py-2 rounded-xl border border-white/20">
             <p className="text-slate-700 font-semibold">
@@ -202,7 +199,6 @@ export function Books() {
           </div>
         </div>
 
-        {/* Book Grid */}
         <BookGrid books={filteredBooks} />
 
         {filteredBooks.length > 12 && (
@@ -216,4 +212,3 @@ export function Books() {
     </div>
   );
 }
-

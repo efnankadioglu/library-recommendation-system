@@ -285,3 +285,89 @@ export async function createReview(review: Omit<Review, 'id' | 'createdAt'>): Pr
     }, 500);
   });
 }
+
+// REAL REVIEWS API (AWS)
+
+type ReviewApiItem = {
+  bookId: string;
+  createdAt: string;
+  userId: string;
+  userName?: string;
+  rating: number;
+  comment?: string;
+};
+
+const toReview = (item: ReviewApiItem): Review => ({
+  id: `${item.bookId}#${item.createdAt}`,
+  bookId: item.bookId,
+  userId: item.userId,
+  userName: item.userName ?? '',
+  rating: item.rating,
+  comment: item.comment ?? '',
+  createdAt: item.createdAt,
+});
+
+type CreateReviewPayload = {
+  bookId: string;
+  userId: string;      
+  userName?: string;  
+  rating: number;
+  comment?: string;
+};
+
+
+// GET /reviews?bookId=...
+export async function getReviewsApi(bookId: string): Promise<Review[]> {
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(`${API_BASE_URL}/reviews?bookId=${encodeURIComponent(bookId)}`, {
+    method: 'GET',
+    headers: authHeaders,
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Failed to fetch reviews (${response.status}). ${text}`);
+  }
+
+  const raw = (await response.json()) as ReviewApiItem[];
+  return Array.isArray(raw) ? raw.map(toReview) : [];
+}
+
+// POST /reviews (JWT required)
+export async function createReviewApi(payload: CreateReviewPayload): Promise<Review> {
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(`${API_BASE_URL}/reviews`, {
+    method: 'POST',
+    headers: authHeaders,
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Failed to create review (${response.status}). ${text}`);
+  }
+
+  const item = (await response.json()) as ReviewApiItem;
+  return toReview(item);
+}
+
+// DELETE /reviews?bookId=...&createdAt=... (JWT required)
+export async function deleteReviewApi(bookId: string, createdAt: string): Promise<void> {
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(
+    `${API_BASE_URL}/reviews?bookId=${encodeURIComponent(bookId)}&createdAt=${encodeURIComponent(createdAt)}`,
+    {
+      method: 'DELETE',
+      headers: authHeaders,
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Failed to delete review (${response.status}). ${text}`);
+  }
+}
+

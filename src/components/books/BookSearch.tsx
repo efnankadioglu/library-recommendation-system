@@ -98,6 +98,7 @@ export function BookSearch({ onSubmit, genreOptions, yearOptions }: BookSearchPr
               <option value="4.5">4.5+ Stars</option>
               <option value="4.0">4.0+ Stars</option>
               <option value="3.5">3.5+ Stars</option>
+              <option value="3.0">3.0+ Stars</option>
             </select>
           </div>
 

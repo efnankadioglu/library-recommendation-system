@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useEffect } from 'react';
 import { User } from '@/types';
+
 import {
   signIn,
   signUp,
@@ -12,8 +13,11 @@ import {
 } from 'aws-amplify/auth';
 
 /**
- * Authentication context type definition
- */
+
+* Authentication context type definition
+
+*/
+
 export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -28,20 +32,25 @@ export interface AuthContextType {
 /**
  * Authentication context
  */
+
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
  * AuthProvider component props
  */
+
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
 // JWT payload decode helper (no external dependency)
+
 function decodeJwtPayload(token: string) {
   try {
     const payloadPart = token.split('.')[1];
+
     const payloadJson = atob(payloadPart.replace(/-/g, '+').replace(/_/g, '/'));
+
     return JSON.parse(payloadJson);
   } catch {
     return null;
@@ -50,17 +59,23 @@ function decodeJwtPayload(token: string) {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
+
   const [isAdmin, setIsAdmin] = useState(false);
 
   const resolveIsAdmin = async (): Promise<boolean> => {
     try {
       const session = await fetchAuthSession();
+
       const accessToken = session.tokens?.accessToken?.toString();
+
       if (!accessToken) return false;
 
       const payload = decodeJwtPayload(accessToken);
+
       const groups: string[] = payload?.['cognito:groups'] || [];
+
       return groups.includes('Admin');
     } catch {
       return false;
@@ -71,23 +86,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const checkAuth = async () => {
       try {
         const currentUser = await getCurrentUser();
+
         const attributes = await fetchUserAttributes();
 
-        // 1. ÖNCE: Admin olup olmadığını öğreniyoruz
-        const admin = await resolveIsAdmin();
-        setIsAdmin(admin);
-
-        // 2. SONRA: Öğrendiğimiz bu bilgiyi kullanarak kullanıcıyı set ediyoruz
         setUser({
           id: currentUser.userId,
+
           email: attributes.email || '',
+
           name: attributes.name || currentUser.username,
+
           role: 'user',
+
           createdAt: new Date().toISOString(),
         });
+
+        const admin = await resolveIsAdmin();
+
+        setIsAdmin(admin);
       } catch {
         setUser(null);
+
         setIsAdmin(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -96,6 +118,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
+
     try {
       const { isSignedIn } = await signIn({ username: email, password });
 
@@ -103,21 +126,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const currentUser = await getCurrentUser();
         const attributes = await fetchUserAttributes();
 
-        // 1. ÖNCE admin olup olmadığını çözüyoruz
-        const admin = await resolveIsAdmin();
-        setIsAdmin(admin);
-
-        // 2. SONRA bu bilgiyi kullanarak kullanıcıyı set ediyoruz
         setUser({
           id: currentUser.userId,
           email: attributes.email || email,
           name: attributes.name || currentUser.username,
-          role: admin ? 'admin' : 'user', // Artık admin tanımlı olduğu için hata vermez!
+          role: 'user',
+
           createdAt: new Date().toISOString(),
         });
+
+        const admin = await resolveIsAdmin();
+
+        setIsAdmin(admin);
       }
     } catch (error) {
       console.error('Login error:', error);
+
       throw error;
     } finally {
       setIsLoading(false);
@@ -128,10 +152,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       await signOut();
+
       setUser(null);
+
       setIsAdmin(false);
     } catch (error) {
       console.error('Logout error:', error);
+
       throw error;
     } finally {
       setIsLoading(false);
@@ -140,13 +167,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signup = async (email: string, password: string, name: string) => {
     setIsLoading(true);
+
     try {
       await signUp({
         username: email,
+
         password,
+
         options: {
           userAttributes: {
             email,
+
             name,
           },
         },
@@ -157,6 +188,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       );
     } catch (error) {
       console.error('Signup error:', error);
+
       throw error;
     } finally {
       setIsLoading(false);
@@ -166,10 +198,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const confirmSignup = async (username: string, code: string) => {
     await confirmSignUp({
       username,
+
       confirmationCode: code,
     });
   };
-
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,

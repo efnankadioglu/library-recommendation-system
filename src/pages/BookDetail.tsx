@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
+
 import { useParams, useNavigate } from 'react-router-dom';
+
 import { Button } from '@/components/common/Button';
+
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+
 import { Modal } from '@/components/common/Modal';
+
 import {
   getBook,
   getReadingLists,
@@ -11,80 +16,121 @@ import {
   createReviewApi,
   deleteReviewApi,
 } from '@/services/api';
+
 import { Book, ReadingList, Review } from '@/types';
+
 import { formatRating } from '@/utils/formatters';
+
 import { handleApiError, showSuccess } from '@/utils/errorHandling';
+
 import { useAuth } from '@/hooks/useAuth';
 
 type MaybeNumber = number | string | undefined | null;
 
 type BookApiShape = Partial<Book> & {
   id?: string;
+
   bookId?: string;
+
   rating?: MaybeNumber;
+
   averageRating?: MaybeNumber;
+
   year?: MaybeNumber;
+
   publishedYear?: MaybeNumber;
+
   publicationYear?: MaybeNumber;
+
   published_date?: MaybeNumber;
 };
 
 const toNumber = (v: MaybeNumber): number => {
   const n = typeof v === 'string' ? Number(v) : typeof v === 'number' ? v : 0;
+
   return Number.isFinite(n) ? n : 0;
 };
 
 const mapBookFromApi = (raw: BookApiShape): Book => {
   const bookId = String(raw.bookId ?? raw.id ?? '');
+
   const rating = toNumber(raw.rating ?? raw.averageRating);
+
   const publishedYear = toNumber(
     raw.publishedYear ?? raw.publicationYear ?? raw.year ?? raw.published_date
   );
 
   return {
     bookId,
+
     title: String(raw.title ?? ''),
+
     author: String(raw.author ?? ''),
+
     genre: String(raw.genre ?? ''),
+
     description: String(raw.description ?? ''),
+
     coverImage: String(raw.coverImage ?? ''),
+
     rating,
+
     publishedYear,
+
     isbn: String(raw.isbn ?? ''),
   };
 };
 
 /**
- * BookDetail page component
- */
+
+* BookDetail page component
+
+*/
+
 export function BookDetail() {
   // const { user } = useAuth();
+
   const { user, isAdmin } = useAuth();
 
   const { id } = useParams<{ id: string }>();
+
   const navigate = useNavigate();
+
   const [book, setBook] = useState<Book | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
+
   const [isListModalOpen, setIsListModalOpen] = useState(false);
+
   const [userLists, setUserLists] = useState<ReadingList[]>([]);
+
   const [isUpdating, setIsUpdating] = useState(false);
+
   const [reviews, setReviews] = useState<Review[]>([]);
+
   const [isReviewsLoading, setIsReviewsLoading] = useState(false);
+
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
   const [reviewRating, setReviewRating] = useState<number>(5);
+
   const [reviewComment, setReviewComment] = useState<string>('');
+
   const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
+
   console.log('REVIEWS STATE:', reviews);
 
   useEffect(() => {
     if (id) {
       loadBook(id);
+
       loadReviews(id);
     }
   }, [id]);
 
   const loadBook = async (bookId: string) => {
     setIsLoading(true);
+
     try {
       const data = await getBook(bookId);
 
@@ -92,6 +138,7 @@ export function BookDetail() {
         const foundRaw = (data as BookApiShape[]).find(
           (b) => String(b.bookId ?? b.id ?? '') === String(bookId)
         );
+
         setBook(foundRaw ? mapBookFromApi(foundRaw) : null);
       } else {
         setBook(data ? mapBookFromApi(data as BookApiShape) : null);
@@ -105,8 +152,10 @@ export function BookDetail() {
 
   const loadReviews = async (bookId: string) => {
     setIsReviewsLoading(true);
+
     try {
       const data = await getReviewsApi(bookId);
+
       setReviews(data);
     } catch (error) {
       handleApiError(error);
@@ -118,13 +167,17 @@ export function BookDetail() {
   const handleAddToList = async () => {
     if (!user) {
       alert('You must be logged in to manage reading lists.');
+
       navigate('/login');
+
       return;
     }
 
     setIsListModalOpen(true);
+
     try {
       const lists = await getReadingLists();
+
       setUserLists(lists);
     } catch (error) {
       handleApiError(error);
@@ -136,14 +189,19 @@ export function BookDetail() {
 
     if (list.bookIds.includes(book.bookId)) {
       alert('This book is already in this list!');
+
       return;
     }
 
     setIsUpdating(true);
+
     try {
       const updatedBookIds = [...list.bookIds, book.bookId];
+
       await updateReadingList(list.id, { ...list, bookIds: updatedBookIds });
+
       showSuccess(`Added to ${list.name}!`);
+
       setIsListModalOpen(false);
     } catch (error) {
       handleApiError(error);
@@ -189,6 +247,7 @@ export function BookDetail() {
               d="M15 19l-7-7 7-7"
             />
           </svg>
+
           <span className="font-semibold">Back</span>
         </button>
 
@@ -204,6 +263,7 @@ export function BookDetail() {
                     e.currentTarget.src = 'https://via.placeholder.com/300x400?text=No+Cover';
                   }}
                 />
+
                 <div className="absolute inset-0 bg-gradient-to-t from-violet-900/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             </div>
@@ -212,6 +272,7 @@ export function BookDetail() {
               <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-3 leading-tight">
                 {book.title}
               </h1>
+
               <p className="text-xl text-slate-600 mb-6 font-medium">by {book.author}</p>
 
               <div className="flex flex-wrap items-center gap-4 mb-8">
@@ -249,6 +310,7 @@ export function BookDetail() {
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
+
                   <span className="font-semibold">{book.publishedYear}</span>
                 </div>
               </div>
@@ -258,6 +320,7 @@ export function BookDetail() {
                   <span className="w-1 h-6 bg-gradient-to-b from-violet-600 to-indigo-600 rounded-full mr-3"></span>
                   Description
                 </h2>
+
                 <p className="text-slate-700 leading-relaxed text-lg">{book.description}</p>
               </div>
 
@@ -291,9 +354,12 @@ export function BookDetail() {
                   onClick={() => {
                     if (!user) {
                       alert('You must be logged in to write a review.');
+
                       navigate('/login');
+
                       return;
                     }
+
                     setIsReviewModalOpen(true);
                   }}
                 >
@@ -339,8 +405,10 @@ export function BookDetail() {
                     <p className="font-bold text-slate-900 group-hover:text-violet-700">
                       {list.name}
                     </p>
+
                     <p className="text-xs text-slate-500">{list.bookIds.length} books</p>
                   </div>
+
                   <svg
                     className="w-5 h-5 text-slate-400 group-hover:text-violet-500"
                     fill="none"
@@ -357,6 +425,7 @@ export function BookDetail() {
                 </button>
               ))
             )}
+
             <Button
               variant="secondary"
               className="w-full mt-4"
@@ -377,6 +446,7 @@ export function BookDetail() {
               <label className="block text-sm font-semibold text-slate-700 mb-1">
                 Rating (1-5)
               </label>
+
               <input
                 type="number"
                 min={1}
@@ -389,6 +459,7 @@ export function BookDetail() {
 
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">Comment</label>
+
               <textarea
                 value={reviewComment}
                 onChange={(e) => setReviewComment(e.target.value)}
@@ -403,24 +474,34 @@ export function BookDetail() {
               disabled={isReviewSubmitting}
               onClick={async () => {
                 if (!id) return;
+
                 if (!user) return;
 
                 const safeRating = Math.max(1, Math.min(5, Number(reviewRating)));
 
                 setIsReviewSubmitting(true);
+
                 try {
                   await createReviewApi({
                     bookId: id,
+
                     userId: user.id,
+
                     userName: user.name ?? 'User',
+
                     isAdmin,
+
                     rating: safeRating,
+
                     comment: reviewComment,
                   });
 
                   showSuccess('Review submitted!');
+
                   setIsReviewModalOpen(false);
+
                   setReviewRating(5);
+
                   setReviewComment('');
 
                   await loadReviews(id);
@@ -463,6 +544,7 @@ export function BookDetail() {
                   />
                 </svg>
               </div>
+
               <p className="text-slate-600 text-lg">
                 No reviews yet. Be the first to share your thoughts!
               </p>
@@ -476,10 +558,12 @@ export function BookDetail() {
                       <div className="text-slate-900 font-medium text-base">
                         {r.userName?.trim() ? r.userName : 'User'}
                       </div>
+
                       {r.isAdmin && (
                         <span
                           className="text-[11px] font-semibold px-2 py-0.5 rounded-full
-                         bg-violet-100 text-violet-700 border border-violet-200"
+
+bg-violet-100 text-violet-700 border border-violet-200"
                         >
                           Admin
                         </span>
@@ -488,6 +572,7 @@ export function BookDetail() {
 
                     <div className="flex items-center gap-1 text-slate-900 font-semibold">
                       <span className="text-amber-500">⭐</span>
+
                       <span>{r.rating} / 5</span>
                     </div>
                   </div>
@@ -507,9 +592,12 @@ export function BookDetail() {
                         size="sm"
                         onClick={async () => {
                           if (!id) return;
+
                           try {
                             await deleteReviewApi(r.bookId, r.createdAt);
+
                             showSuccess('Review deleted.');
+
                             await loadReviews(id);
                           } catch (error) {
                             handleApiError(error);

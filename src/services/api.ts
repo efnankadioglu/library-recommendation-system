@@ -53,12 +53,8 @@ export async function getBooks(): Promise<Book[]> {
 
 /* Get a single book by ID */
 export async function getBook(id: string): Promise<Book | null> {
-  const authHeaders = await getAuthHeaders(); // Token'ı alıyoruz
 
-  const response = await fetch(`${API_BASE_URL}/books/${id}`, {
-    method: 'GET',
-    headers: authHeaders
-  });
+  const response = await fetch(`${API_BASE_URL}/books/${id}`);
 
   if (response.status === 404) return null;
   if (!response.ok) throw new Error('Failed to fetch book');

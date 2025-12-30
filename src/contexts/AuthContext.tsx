@@ -82,7 +82,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           id: currentUser.userId,
           email: attributes.email || '',
           name: attributes.name || currentUser.username,
-          role: admin ? 'admin' : 'user', // Artık admin değişkeni yukarıda tanımlı olduğu için hata vermez!
+          role: 'user',
           createdAt: new Date().toISOString(),
         });
       } catch {

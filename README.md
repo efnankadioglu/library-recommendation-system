@@ -1,4 +1,4 @@
-# Library Recommendation System
+<# Library Recommendation System
 
 An AI-powered library book recommendation system built with React, TypeScript, Tailwind CSS, and AWS serverless architecture. This is a 4-week intensive project for CENG413 Software Quality Standards course.
 

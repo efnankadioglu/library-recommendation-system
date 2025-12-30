@@ -37,6 +37,7 @@ export interface Review {
   bookId: string;
   userId: string;
   userName?: string;
+  isAdmin?: boolean;
   rating: number;
   comment: string;
   createdAt: string;

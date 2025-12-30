@@ -12,6 +12,7 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Admin } from './pages/Admin';
 import { NotFound } from './pages/NotFound';
+import { AdminRoute } from './components/common/AdminRoute';
 
 /**
  * Main App component with routing and layout
@@ -41,10 +42,9 @@ function App() {
               <Route
                 path="/admin"
                 element={
-                  // <ProtectedRoute requireAdmin>
-                  <ProtectedRoute>
+                  <AdminRoute>
                     <Admin />
-                  </ProtectedRoute>
+                  </AdminRoute>
                 }
               />
               <Route path="*" element={<NotFound />} />

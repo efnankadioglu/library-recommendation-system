@@ -1,7 +1,6 @@
 import { Book, ReadingList, Review } from '@/types';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-
 // Artık API_BASE_URL aktif (env’den geliyor)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -53,7 +52,6 @@ export async function getBooks(): Promise<Book[]> {
 
 /* Get a single book by ID */
 export async function getBook(id: string): Promise<Book | null> {
-
   const response = await fetch(`${API_BASE_URL}/books/${id}`);
 
   if (response.status === 404) return null;
@@ -305,12 +303,12 @@ const toReview = (item: ReviewApiItem): Review => ({
 
 type CreateReviewPayload = {
   bookId: string;
-  userId: string;      
-  userName?: string;  
+  userId: string;
+  userName?: string;
+  isAdmin?: boolean;
   rating: number;
   comment?: string;
 };
-
 
 // GET /reviews?bookId=...
 export async function getReviewsApi(bookId: string): Promise<Review[]> {
@@ -366,4 +364,3 @@ export async function deleteReviewApi(bookId: string, createdAt: string): Promis
     throw new Error(`Failed to delete review (${response.status}). ${text}`);
   }
 }
-

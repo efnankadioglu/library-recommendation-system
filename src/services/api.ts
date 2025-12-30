@@ -1,7 +1,6 @@
 import { Book, ReadingList, Review } from '@/types';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-// Artık API_BASE_URL aktif (env’den geliyor)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 if (!API_BASE_URL) {

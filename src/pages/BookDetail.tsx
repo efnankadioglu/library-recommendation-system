@@ -1,13 +1,8 @@
 import { useState, useEffect } from 'react';
-
 import { useParams, useNavigate } from 'react-router-dom';
-
 import { Button } from '@/components/common/Button';
-
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-
 import { Modal } from '@/components/common/Modal';
-
 import {
   getBook,
   getReadingLists,
@@ -18,30 +13,19 @@ import {
 } from '@/services/api';
 
 import { Book, ReadingList, Review } from '@/types';
-
 import { formatRating } from '@/utils/formatters';
-
 import { handleApiError, showSuccess } from '@/utils/errorHandling';
-
 import { useAuth } from '@/hooks/useAuth';
-
 type MaybeNumber = number | string | undefined | null;
 
 type BookApiShape = Partial<Book> & {
   id?: string;
-
   bookId?: string;
-
   rating?: MaybeNumber;
-
   averageRating?: MaybeNumber;
-
   year?: MaybeNumber;
-
   publishedYear?: MaybeNumber;
-
   publicationYear?: MaybeNumber;
-
   published_date?: MaybeNumber;
 };
 
@@ -53,7 +37,6 @@ const toNumber = (v: MaybeNumber): number => {
 
 const mapBookFromApi = (raw: BookApiShape): Book => {
   const bookId = String(raw.bookId ?? raw.id ?? '');
-
   const rating = toNumber(raw.rating ?? raw.averageRating);
 
   const publishedYear = toNumber(
@@ -62,21 +45,13 @@ const mapBookFromApi = (raw: BookApiShape): Book => {
 
   return {
     bookId,
-
     title: String(raw.title ?? ''),
-
     author: String(raw.author ?? ''),
-
     genre: String(raw.genre ?? ''),
-
     description: String(raw.description ?? ''),
-
     coverImage: String(raw.coverImage ?? ''),
-
     rating,
-
     publishedYear,
-
     isbn: String(raw.isbn ?? ''),
   };
 };
@@ -91,31 +66,18 @@ export function BookDetail() {
   // const { user } = useAuth();
 
   const { user, isAdmin } = useAuth();
-
   const { id } = useParams<{ id: string }>();
-
   const navigate = useNavigate();
-
   const [book, setBook] = useState<Book | null>(null);
-
   const [isLoading, setIsLoading] = useState(true);
-
   const [isListModalOpen, setIsListModalOpen] = useState(false);
-
   const [userLists, setUserLists] = useState<ReadingList[]>([]);
-
   const [isUpdating, setIsUpdating] = useState(false);
-
   const [reviews, setReviews] = useState<Review[]>([]);
-
   const [isReviewsLoading, setIsReviewsLoading] = useState(false);
-
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-
   const [reviewRating, setReviewRating] = useState<number>(5);
-
   const [reviewComment, setReviewComment] = useState<string>('');
-
   const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
 
   console.log('REVIEWS STATE:', reviews);
@@ -199,7 +161,6 @@ export function BookDetail() {
       const updatedBookIds = [...list.bookIds, book.bookId];
 
       await updateReadingList(list.id, { ...list, bookIds: updatedBookIds });
-
       showSuccess(`Added to ${list.name}!`);
 
       setIsListModalOpen(false);
@@ -559,11 +520,14 @@ export function BookDetail() {
                         {r.userName?.trim() ? r.userName : 'User'}
                       </div>
 
-                      {r.isAdmin && (
+                      {/* ❌ SİLİNDİ: backend yok */}
+                      {/* {r.isAdmin && ( */}
+
+                      {/* ✅ EKLENDİ: sadece Efnan Kadıoğlu */}
+                      {r.userName?.trim() === 'Efnan Kadıoğlu' && (
                         <span
                           className="text-[11px] font-semibold px-2 py-0.5 rounded-full
-
-bg-violet-100 text-violet-700 border border-violet-200"
+              bg-violet-100 text-violet-700 border border-violet-200"
                         >
                           Admin
                         </span>

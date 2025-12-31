@@ -6,13 +6,18 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { getBooks, createBook, deleteBook, updateBook } from '@/services/api';
 import { Book } from '@/types';
 import { handleApiError, showSuccess } from '@/utils/errorHandling';
+import { getAdminUsersCount } from '@/services/api';
+import { getAdminReadingListsCount } from '@/services/api';
 
 /**
  * Admin page component for managing books and viewing metrics
  */
 export function Admin() {
   const [books, setBooks] = useState<Book[]>([]);
+  const [usersCount, setUsersCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [readingListsCount, setReadingListsCount] = useState<number>(0);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newBook, setNewBook] = useState({
     title: '',
@@ -27,6 +32,7 @@ export function Admin() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editBookId, setEditBookId] = useState<string | null>(null);
+
   const [editBook, setEditBook] = useState({
     title: '',
     author: '',
@@ -38,19 +44,42 @@ export function Admin() {
     isbn: '',
   });
 
+  const loadReadingListsCount = async () => {
+    try {
+      const count = await getAdminReadingListsCount();
+      setReadingListsCount(count);
+    } catch (error) {
+      handleApiError(error);
+      setReadingListsCount(0);
+    }
+  };
+
   useEffect(() => {
     loadBooks();
+    loadUsersCount();
+    loadReadingListsCount();
   }, []);
 
   const loadBooks = async () => {
     setIsLoading(true);
     try {
       const data = await getBooks();
+      console.log('Admin books:', data);
       setBooks(data);
     } catch (error) {
       handleApiError(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadUsersCount = async () => {
+    try {
+      const count = await getAdminUsersCount();
+      console.log('Admin users count:', count);
+      setUsersCount(count);
+    } catch (error) {
+      handleApiError(error);
     }
   };
 
@@ -152,13 +181,12 @@ export function Admin() {
           </div>
           <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
             <h3 className="text-lg font-semibold mb-2 opacity-90">Total Users</h3>
-            <p className="text-5xl font-bold">42</p>
-            <p className="text-sm mt-1 opacity-75">Placeholder data</p>
+            <p className="text-5xl font-bold">{usersCount}</p>
           </div>
           <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
             <h3 className="text-lg font-semibold mb-2 opacity-90">Active Reading Lists</h3>
-            <p className="text-5xl font-bold">18</p>
-            <p className="text-sm mt-1 opacity-75">Placeholder data</p>
+            <p className="text-5xl font-bold">{readingListsCount}</p>
+            <p className="text-sm mt-1 opacity-75">From reading lists</p>
           </div>
         </div>
 

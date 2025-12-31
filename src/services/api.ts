@@ -336,7 +336,6 @@ export async function createReviewApi(payload: CreateReviewPayload): Promise<Rev
     headers: authHeaders,
     body: JSON.stringify(payload),
   });
-
   if (!response.ok) {
     const text = await response.text().catch(() => '');
     throw new Error(`Failed to create review (${response.status}). ${text}`);
@@ -357,9 +356,66 @@ export async function deleteReviewApi(bookId: string, createdAt: string): Promis
       headers: authHeaders,
     }
   );
-
   if (!response.ok) {
     const text = await response.text().catch(() => '');
     throw new Error(`Failed to delete review (${response.status}). ${text}`);
   }
+  return;
+}
+
+export async function getAdminReadingListsCount(): Promise<number> {
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(`${API_BASE_URL}/admin/reading-lists-count`, {
+    method: 'GET',
+    headers: authHeaders,
+  });
+
+  if (!response.ok) {
+    // 500 hatası aldığımızda Dashboard'da 0 görünsün, hata fırlatıp sayfayı bozmasın
+    return 0;
+  }
+
+  const data = await unwrapJson<{
+    count?: number;
+    readingListsCount?: number;
+    total?: number;
+    totalLists?: number;
+  }>(response);
+
+  // Olası tüm isimleri kontrol ediyoruz
+  const count = data.count ?? data.readingListsCount ?? data.total ?? data.totalLists ?? 0;
+
+  return count;
+}
+
+export async function getAdminUsersCount(): Promise<number> {
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(`${API_BASE_URL}/admin/users-count`, {
+    method: 'GET',
+    headers: authHeaders,
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Failed to fetch users count (${response.status}). ${text}`);
+  }
+
+  // totalUsers alanını buraya ekliyoruz şekerim!
+  const data = await unwrapJson<{
+    count?: number;
+    usersCount?: number;
+    total?: number;
+    totalUsers?: number;
+  }>(response);
+
+  // Backend'den gelen 5 değerini yakalamak için totalUsers'ı buraya da ekliyoruz
+  const count = data.count ?? data.usersCount ?? data.total ?? data.totalUsers;
+
+  if (typeof count !== 'number') {
+    throw new Error(`Users count response is invalid: ${JSON.stringify(data)}`);
+  }
+
+  return count;
 }

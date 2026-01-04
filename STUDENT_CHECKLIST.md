@@ -307,8 +307,8 @@ artifacts:
 - [X] Fix any bugs found
 - [X] Run `npm test` - verify tests pass
 - [X] Run `npm run lint` - fix any errors
-- [ ] Check test coverage: `npm run test:coverage`
-- [ ] Verify >70% coverage
+- [X] Check test coverage: `npm run test:coverage`
+- [X] Verify >70% coverage
 
 ### Documentation & Presentation
 

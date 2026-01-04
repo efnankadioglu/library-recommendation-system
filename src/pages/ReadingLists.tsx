@@ -145,7 +145,8 @@ export function ReadingLists() {
                 key={list.id}
                 className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col h-[420px] hover:shadow-xl hover:border-violet-400 transition-all duration-300 relative group"
               >
-                <button 
+                <button
+                  aria-label="delete-reading-list"
                   onClick={() => handleDeleteList(list.id)}
                   className="absolute top-4 right-4 text-slate-300 hover:text-red-500 font-bold text-2xl transition-colors"
                 >
@@ -176,7 +177,13 @@ export function ReadingLists() {
                       return (
                         <div key={bId} className="flex items-center gap-1 bg-violet-600 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-tighter shadow-sm">
                           <span className="max-w-[110px] truncate">{book?.title || 'Book'}</span>
-                          <button onClick={() => handleRemoveBook(list, bId)} className="ml-1 hover:text-red-200 transition-colors">×</button>
+                          <button
+                            aria-label={`remove-book-${bId}`}
+                            onClick={() => handleRemoveBook(list, bId)}
+                            className="ml-1 hover:text-red-200 transition-colors"
+                          >
+                            ×
+                          </button>
                         </div>
                       );
                     })}

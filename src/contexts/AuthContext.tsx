@@ -202,6 +202,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       confirmationCode: code,
     });
   };
+  
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,

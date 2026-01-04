@@ -1,7 +1,3 @@
-// src/tests/pages/BookDetail.test.tsx
-// SADECE DOSYA – AÇIKLAMA YOK
-
-import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';

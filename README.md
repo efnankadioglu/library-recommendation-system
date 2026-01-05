@@ -692,3 +692,87 @@ This project is part of an academic course at Istanbul Okan University.
 **Project Type**: 4-week intensive, beginner-friendly, AWS serverless  
 **Status**: Frontend complete ✅ | Backend implementation guides ready ✅  
 **Next Step**: [QUICK_START.md](./QUICK_START.md) 🚀
+
+DOCUMENTATION
+
+📡 API Endpoints
+The backend is built using AWS API Gateway and Lambda.Base
+
+🏗️ Architecture
+This project utilizes a Serverless Microservices Architecture on AWS.
+graph TD
+Code Snippet:
+    User[User / Browser]
+    
+    subgraph "Frontend Hosting"
+        CF[CloudFront CDN]
+        S3[S3 Bucket]
+    end
+    
+    subgraph "Authentication"
+        Cognito[Amazon Cognito]
+    end
+    
+    subgraph "Backend Services"
+        APIG[API Gateway]
+        
+        subgraph "Compute (Lambda)"
+            Fn_Books[Get Books]
+            Fn_Lists[Manage Lists]
+            Fn_AI[AI Recommendation]
+        end
+        
+        DB[(DynamoDB)]
+        Bedrock[Amazon Bedrock]
+    end
+
+    %% Data Flow
+    User -->|HTTPS Request| CF
+    CF --> S3
+    User -->|Auth / Token| Cognito
+    User -->|API REST Calls| APIG
+    
+    APIG --> Fn_Books
+    APIG --> Fn_Lists
+    APIG --> Fn_AI
+    
+    Fn_Books <--> DB
+    Fn_Lists <--> DB
+    Fn_AI -->|Prompt Engineering| Bedrock
+    ⚙️ Setup Instructions
+Follow these steps to run the project locally.
+
+1. Clone the Repository
+Bash
+
+git clone https://github.com/efnankadioglu/library-recommendation-system.git
+cd library-recommendation-system
+2. Install Dependencies
+Bash
+
+npm install
+3. Configure Environment Variables
+Create a .env file in the root directory and add your AWS credentials/endpoints:
+
+Code Snippet
+
+VITE_API_BASE_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/dev
+VITE_AWS_REGION=us-east-1
+VITE_COGNITO_USER_POOL_ID=us-east-1_xxxxxx
+VITE_COGNITO_CLIENT_ID=xxxxxxxxxxxxxx
+4. Run Locally
+Bash
+
+npm run dev
+The app will start at http://localhost:5173.
+
+👥 Team Contributions
+This project was developed by the CENG413 Team using Agile methodologies.
+Team Member,Primary Roles & Contributions
+Efnan Büşra Kadıoğlu,"Full Stack / Frontend LeadUI/UX Implementation, React Architecture, Component Design."
+
+Sıla Yeşilyurt,"Backend / AWS LambdaAPI Gateway setup, Lambda function implementation, Integration testing."
+
+Şevval Ekin Tokgöz,"Database / DynamoDBNoSQL Data modeling, Table configuration, Data consistency checks."
+
+Mehmet Konuralp Hekimbaşı,"Coverage Testing, Documentation, Presentation."

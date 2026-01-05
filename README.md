@@ -768,7 +768,9 @@ The app will start at http://localhost:5173.
 
 👥 Team Contributions
 This project was developed by the CENG413 Team using Agile methodologies.
+
 Team Member,Primary Roles & Contributions
+
 Efnan Büşra Kadıoğlu,"Full Stack / Frontend LeadUI/UX Implementation, React Architecture, Component Design."
 
 Sıla Yeşilyurt,"Backend / AWS LambdaAPI Gateway setup, Lambda function implementation, Integration testing."
